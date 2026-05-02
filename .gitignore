@@ -5,6 +5,7 @@
 
 # Dependencies
 node_modules/
+backend/venv/
 venv/
 env/
 ENV/
@@ -46,13 +47,21 @@ frontend/.local
 # Database
 *.db
 *.sqlite3
+backend/fraud.db
 fraud.db
 
 # Models and large files
+backend/data/
 data/
 *.csv
+backend/raw/vennon.csv
 raw/vennon.csv
+backend/processed/real_data.json
 processed/real_data.json
+backend/models/__pycache__/
+backend/models/*.pkl
+backend/models/distilbert_model/
+backend/models/distilbert_training_output/
 models/__pycache__/
 models/*.pkl
 models/distilbert_model/
@@ -80,6 +89,3 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
-data/
-data/
-data/

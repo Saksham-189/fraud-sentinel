@@ -1,0 +1,7 @@
+{
+  "credential_intent": 0.35,
+  "urgency": 0.20,
+  "authority": 0.20,
+  "fear": 0.20,
+  "link_risk": 0.05
+}

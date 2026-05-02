@@ -40,7 +40,7 @@ function HeroSection() {
       <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="w-full lg:w-1/2 flex flex-col gap-6 relative z-10">
         <Reveal><h1 className="font-headline-xl text-headline-xl text-on-background">Stop Fraud with Intelligent Conversation Analysis</h1></Reveal>
-        <Reveal delay={0.1}><p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Analyze messages and conversations using AI to detect scams and fraud in real time. Secure your enterprise with precision.</p></Reveal>
+        <Reveal delay={0.1}><p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Analyze messages and conversations using AI to detect scams and fraud. Secure your enterprise with precision.</p></Reveal>
         <Reveal delay={0.2}>
           <div className="flex items-center gap-4 mt-4">
             <motion.div whileHover={{ scale: 1.04, boxShadow: "0 8px 30px rgba(53,37,205,0.25)" }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
