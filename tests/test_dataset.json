@@ -1,0 +1,32 @@
+[
+  {
+    "category": "Normal",
+    "text": "Hey, what time are we meeting tomorrow?",
+    "expected_risk": "SAFE"
+  },
+  {
+    "category": "Normal",
+    "text": "Can you send me the recipe for that pasta we had last night?",
+    "expected_risk": "SAFE"
+  },
+  {
+    "category": "Fraud",
+    "text": "URGENT: Your account has been suspended. Please click here to verify your identity and restore access immediately.",
+    "expected_risk": "HIGH RISK"
+  },
+  {
+    "category": "Fraud",
+    "text": "Dear customer, your RBI security team has detected suspicious activity. Please share the 6-digit OTP sent to your phone to secure your bank account.",
+    "expected_risk": "HIGH RISK"
+  },
+  {
+    "category": "Edge",
+    "text": "",
+    "expected_risk": "SAFE"
+  },
+  {
+    "category": "Edge",
+    "text": "A very long message that just keeps going and going and going without saying anything of substance, but it might contain a random link at the end like http://example.com/nothing-important",
+    "expected_risk": "SAFE"
+  }
+]

@@ -1,0 +1,84 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+venv/
+env/
+ENV/
+.venv/
+dist/
+build/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Frontend specific
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.local
+
+# Database
+*.db
+*.sqlite3
+fraud.db
+
+# Models and large files
+data/
+*.csv
+raw/vennon.csv
+processed/real_data.json
+models/__pycache__/
+models/*.pkl
+models/distilbert_model/
+models/distilbert_training_output/
+
+# IDE / Editor
+.vscode/
+.idea/
+.qodo/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+data/
+data/

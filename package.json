@@ -1,0 +1,15 @@
+{
+  "name": "fraud-sentinel-v2",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "python -m uvicorn api.main:app --reload",
+    "dev": "npm run dev:frontend",
+    "install:all": "npm install && cd frontend && npm install"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4"
+  }
+}

@@ -1,0 +1,14 @@
+# Backend API & Models
+fastapi
+uvicorn[standard]
+pydantic
+bcrypt
+PyJWT
+python-dotenv
+torch
+transformers
+scikit-learn
+numpy
+pandas
+requests
+gunicorn
