@@ -1,7 +1,4 @@
-const API_BASE =
-  import.meta.env.VITE_API_URL != null && import.meta.env.VITE_API_URL !== ""
-    ? import.meta.env.VITE_API_URL
-    : "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export function normalizeConversationMessages(messages) {
   if (!Array.isArray(messages)) return [];
   return messages.map((m) =>
@@ -54,7 +51,7 @@ async function api(endpoint, options = {}) {
     return data.data;
   }
   if (data.success === false && data.error) {
-     return { error: data.error === "invalid input" ? "Invalid input." : data.error };
+    return { error: data.error === "invalid input" ? "Invalid input." : data.error };
   }
   if (data.error && typeof data.error === "string" && data.error !== "") {
     return { error: data.error === "invalid input" ? "Invalid input." : data.error };
