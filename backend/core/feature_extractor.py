@@ -30,6 +30,9 @@ CREDENTIAL_KEYWORDS = [
     "account number", "ifsc", "iban", "sort code", "routing number",
     "share your pin", "enter your pin", "send your pin",
     "share otp", "send otp", "enter otp",
+    "processing fee", "registration fee", "security deposit",
+    "refundable fee", "upi id", "wallet address", "send money",
+    "transfer the fee", "pay via", "payment link", "bank account details",
 ]
 CREDENTIAL_BOUNDARY_KEYWORDS = ["pin", "verify"]
 LINK_KEYWORDS = [
@@ -149,6 +152,19 @@ def extract_features(text: str, prev_text: str = None) -> dict:
         if kw in text_lower and not _is_negated(text_lower, kw):
             features["credential_intent"] = max(features["credential_intent"], 0.9)
             break
+    payment_critical = [
+        "processing fee", "registration fee", "security deposit",
+        "refundable fee", "upi id", "wallet address", "send money",
+        "transfer the fee", "payment link",
+    ]
+    payment_signal = False
+    for kw in payment_critical:
+        if kw in text_lower and not _is_negated(text_lower, kw):
+            features["credential_intent"] = max(features["credential_intent"], 0.75)
+            payment_signal = True
+            break
+    if payment_signal and any(kw in text_lower for kw in ["now", "today", "immediately", "urgent"]):
+        features["urgency"] = max(features["urgency"], 0.6)
     if _has_word_boundary_match(text_lower, "pin") and not _is_negated(text_lower, "pin"):
         features["credential_intent"] = max(features["credential_intent"], 0.85)
     fear_critical = ["blocked", "suspended", "frozen", "locked"]
@@ -181,7 +197,10 @@ def behavior_score(features: dict) -> float:
         return 0.0
     from api.feedback_store import get_dynamic_weights
     from config.config import BEHAVIOR_WEIGHTS as default_weights
-    dynamic_weights = get_dynamic_weights()
+    try:
+        dynamic_weights = get_dynamic_weights()
+    except Exception:
+        dynamic_weights = None
     if not dynamic_weights:
         dynamic_weights = default_weights
     score = sum(

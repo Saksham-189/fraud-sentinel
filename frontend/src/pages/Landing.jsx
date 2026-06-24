@@ -1,35 +1,47 @@
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useMemo } from "react"
+import { Link, useLocation } from "react-router-dom"
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion"
 import { Reveal, StaggerContainer, StaggerItem, HoverCard, Float, HoverButton } from "../components/Motion"
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const location = useLocation()
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", h, { passive: true })
     return () => window.removeEventListener("scroll", h)
   }, [])
+  
+  const navItems = [
+    { l: "Platform", to: "/" }, 
+    { l: "Solutions", to: "/solutions" }, 
+    { l: "Developers", to: "/developers" }, 
+    { l: "Pricing", to: "/pricing" }
+  ];
+
   return (
-    <motion.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}
-      className={`sticky top-0 z-50 w-full font-headline-md antialiased transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-[0_4px_20px_rgba(0,0,0,0.05)]" : "bg-transparent"}`}>
+    <m.nav initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}
+      className={`sticky top-0 z-50 w-full font-headline antialiased transition-all duration-300 ${scrolled ? "glass border-b border-[var(--border-default)]" : "bg-transparent"}`}>
       <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-8">
-          <Link className="text-xl font-bold tracking-tight text-slate-900" to="/">FraudSentinel</Link>
+          <Link className="text-xl font-bold tracking-tight gradient-text" to="/">FraudSentinel</Link>
           <div className="hidden md:flex gap-6">
-            {[{ l: "Platform", active: true }, { l: "Solutions", to: "/solutions" }, { l: "Developers", to: "/developers" }, { l: "Pricing", to: "/pricing" }].map(n => (
-              <Link key={n.l} to={n.to || "#"} className={`relative font-medium transition-colors duration-200 group ${n.active ? "text-indigo-600 font-semibold" : "text-slate-600 hover:text-indigo-500"}`}>
+            {navItems.map(n => {
+              const isActive = location.pathname === n.to;
+              return (
+              <Link key={n.l} to={n.to} className={`relative font-medium transition-colors duration-200 group ${isActive ? "text-accent-violet font-semibold" : "text-[var(--text-secondary)] hover:text-accent-violet"}`}>
                 {n.l}
-                <span className={`absolute -bottom-1 left-0 h-0.5 bg-indigo-600 transition-all duration-300 ${n.active ? "w-full" : "w-0 group-hover:w-full"}`}></span>
+                <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-300 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}></span>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/login" className="text-indigo-600 font-medium hover:text-indigo-500 transition-colors duration-200">Login</Link>
-          <HoverButton className="bg-primary text-on-primary px-4 py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-shadow">View Demo</HoverButton>
+          <Link to="/login" className="text-accent-violet font-medium hover:opacity-80 transition-opacity">Login</Link>
+          <HoverButton className="bg-gradient-to-r from-violet-600 to-pink-500 text-white px-4 py-2 rounded-xl font-medium shadow-glow-violet hover:shadow-glow-violet-lg transition-all">View Demo</HoverButton>
         </div>
       </div>
-    </motion.nav>
+    </m.nav>
   )
 }
 function HeroSection() {
@@ -43,9 +55,9 @@ function HeroSection() {
         <Reveal delay={0.1}><p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Analyze messages and conversations using AI to detect scams and fraud. Secure your enterprise with precision.</p></Reveal>
         <Reveal delay={0.2}>
           <div className="flex items-center gap-4 mt-4">
-            <motion.div whileHover={{ scale: 1.04, boxShadow: "0 8px 30px rgba(53,37,205,0.25)" }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+            <m.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Link to="/login" className="bg-gradient-to-r from-primary to-secondary text-on-primary px-6 py-3 rounded-lg font-headline-md text-body-md shadow-[0_4px_20px_rgba(0,0,0,0.1)] block">Try Now</Link>
-            </motion.div>
+            </m.div>
             <HoverButton className="border border-outline-variant text-on-surface px-6 py-3 rounded-lg font-headline-md text-body-md hover:bg-surface-variant transition-colors">View Demo</HoverButton>
           </div>
         </Reveal>
@@ -89,7 +101,7 @@ function HeroSection() {
 }
 function FeaturesSection() {
   const [activeStep, setActiveStep] = useState(0);
-  const steps = [
+  const steps = useMemo(() => [
     {
       id: "input",
       icon: "forum",
@@ -155,7 +167,7 @@ function FeaturesSection() {
            <div className="text-6xl font-bold text-error tracking-tight">91%</div>
            <div className="bg-error-container text-on-error-container px-4 py-1.5 rounded-full font-bold text-xs tracking-wider uppercase">High Risk</div>
            <div className="w-full bg-surface-variant rounded-full h-2 mt-4 overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: "91%" }} transition={{ duration: 1, delay: 0.2 }} className="bg-error h-full rounded-full"></motion.div>
+              <m.div initial={{ scaleX: 0 }} animate={{ scaleX: 0.91 }} transition={{ duration: 1, delay: 0.2 }} className="bg-error h-full rounded-full origin-left"></m.div>
            </div>
          </div>
       )
@@ -176,7 +188,7 @@ function FeaturesSection() {
          </div>
       )
     }
-  ];
+  ], []);
   return (
     <section className="w-full bg-surface-container-low py-28 px-6 overflow-hidden">
       <div className="max-w-[1200px] mx-auto">
@@ -205,7 +217,7 @@ function FeaturesSection() {
                      <p className={`text-sm mt-0.5 transition-colors ${isActive ? 'text-on-surface-variant' : 'text-outline'}`}>{step.desc}</p>
                    </div>
                    {isActive && (
-                      <motion.div layoutId="active-indicator" className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-md hidden md:block" />
+                      <m.div layoutId="active-indicator" className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary rounded-r-md" />
                    )}
                  </div>
                )
@@ -216,7 +228,7 @@ function FeaturesSection() {
              <div className="h-1.5 bg-gradient-to-r from-primary via-secondary to-tertiary"></div>
              <div className="p-8 md:p-12 min-h-[420px] flex flex-col">
                 <AnimatePresence mode="wait">
-                  <motion.div
+                  <m.div
                     key={activeStep}
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -235,7 +247,7 @@ function FeaturesSection() {
                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-outline-variant/10 to-transparent"></div>
                        {steps[activeStep].preview}
                     </div>
-                  </motion.div>
+                  </m.div>
                 </AnimatePresence>
              </div>
           </div>
@@ -335,7 +347,7 @@ function CTASection() {
           {badges.map((b) => (
             <div key={b} className="flex items-center gap-2">
               <span className="material-symbols-outlined fill text-[18px] text-emerald-400">check_circle</span>
-              <span className="text-sm text-slate-400">{b}</span>
+              <span className="text-sm text-slate-300">{b}</span>
             </div>
           ))}
         </div>
@@ -343,32 +355,34 @@ function CTASection() {
     </section>
   )
 }
-function Footer() {
+export function Footer() {
   return (
-    <Reveal><footer className="bg-slate-50 w-full py-12 px-6 border-t border-slate-200 text-sm">
+    <Reveal><footer className="glass w-full py-12 px-6 border-t border-[var(--border-default)] text-sm">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="text-lg font-bold text-slate-900">FraudSentinel</div>
+        <div className="text-lg font-bold gradient-text font-headline">FraudSentinel</div>
         <div className="flex flex-wrap justify-center gap-6">
           {["Privacy Policy", "Terms of Service", "Security", "Status", "Contact"].map((t) => (
-            <a key={t} className="text-slate-500 hover:text-indigo-600 transition-colors opacity-80 hover:opacity-100" href="#">{t}</a>
+            <a key={t} className="text-[var(--text-tertiary)] hover:text-accent-violet transition-colors" href="#">{t}</a>
           ))}
         </div>
-        <div className="text-slate-500">© 2024 FraudSentinel AI. All rights reserved.</div>
+        <div className="text-[var(--text-tertiary)]">© {new Date().getFullYear()} FraudSentinel AI. All rights reserved.</div>
       </div>
     </footer></Reveal>
   )
 }
 export default function Landing() {
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow flex flex-col items-center w-full">
-        <HeroSection />
-        <FeaturesSection />
-        <ComprehensiveSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
+    <LazyMotion features={domAnimation} strict>
+      <div className="aurora-bg bg-[var(--surface-0)] text-[var(--text-primary)] font-body min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex flex-col items-center w-full">
+          <HeroSection />
+          <FeaturesSection />
+          <ComprehensiveSection />
+          <CTASection />
+        </main>
+        <Footer />
+      </div>
+    </LazyMotion>
   )
 }

@@ -1,5 +1,8 @@
 import os
-import torch
+try:
+    import torch
+except Exception:
+    torch = None
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "distilbert_model")
 _tokenizer = None
 _model = None
@@ -10,6 +13,10 @@ def load_transformer():
     if _load_attempted:
         return _loaded
     _load_attempted = True
+    if torch is None:
+        print("[Transformer] torch is not installed. Transformer inference will be treated as unavailable.")
+        _loaded = False
+        return False
     if not os.path.exists(MODEL_PATH):
         print(f"[Transformer] Model directory not found at {MODEL_PATH}")
         print("[Transformer] Run train_transformer.py to fine-tune DistilBERT.")
@@ -38,7 +45,7 @@ def predict_transformer(text: str) -> dict:
     if not _load_attempted:
         load_transformer()
     if not _loaded:
-        return {"probability": 0.5, "confidence": 0.0}
+        return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "model_not_loaded"}
     try:
         from config.config import BERT_MAX_LENGTH
         inputs = _tokenizer(
@@ -55,9 +62,11 @@ def predict_transformer(text: str) -> dict:
         confidence = abs(fraud_prob - 0.5) * 2  # Maps [0.5, 1.0] → [0.0, 1.0]
         return {
             "probability": max(0.0, min(1.0, fraud_prob)),
-            "confidence": max(0.0, min(1.0, confidence))
+            "confidence": max(0.0, min(1.0, confidence)),
+            "fallback": False,
+            "reason": "ok",
         }
     except Exception as e:
         import logging
         logging.error(f"[Transformer] Inference error: {type(e).__name__}: {e}")
-        return {"probability": 0.5, "confidence": 0.0}
+        return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "inference_error"}

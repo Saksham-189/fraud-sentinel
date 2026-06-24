@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Reveal, StaggerContainer, StaggerItem, HoverButton, HoverCard } from "../components/Motion";
 import { Sidebar, TopNavbar } from "./Dashboard";
 import { motion, AnimatePresence } from "framer-motion";

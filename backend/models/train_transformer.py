@@ -11,12 +11,38 @@ from config.config import (
     PROCESSED_DIR, SYNTHETIC_DIR, MODEL_DIR,
     BERT_MODEL_NAME, BERT_MAX_LENGTH,
     BERT_TRAIN_EPOCHS, BERT_TRAIN_BATCH, BERT_EVAL_BATCH,
+    BERT_MAX_SAMPLES, BERT_GRADIENT_ACCUMULATION_STEPS,
     BERT_LEARNING_RATE, BERT_WEIGHT_DECAY, BERT_WARMUP_STEPS,
     TEST_SPLIT_SIZE, RANDOM_SEED,
 )
 REAL_DATA_PATH      = os.path.join(PROCESSED_DIR, "real_data.json")
 SYNTHETIC_DATA_PATH = os.path.join(SYNTHETIC_DIR,  "synthetic_data.json")
 SAVE_PATH           = os.path.join(MODEL_DIR, "distilbert_model")
+
+
+def env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except ValueError:
+        print(f"  [WARN] Invalid {name}={value!r}; using {default}")
+        return default
+    return max(parsed, 1)
+
+
+def env_float(name: str, default: float) -> float:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        print(f"  [WARN] Invalid {name}={value!r}; using {default}")
+        return default
+
+
 class FraudDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length=128):
         self.texts = texts
@@ -64,15 +90,15 @@ def load_training_data():
                     texts.append(text)
                     labels.append(1 if label == "fraud" else 0)
         print(f"  Synthetic data: {len(texts) - count_before} messages")
-    MAX_BERT_SAMPLES = 3000  # Total cap for BERT training (CPU-friendly)
-    if len(texts) > MAX_BERT_SAMPLES:
-        print(f"  Dataset too large for BERT ({len(texts)} samples). Subsampling...")
+    max_samples = env_int("BERT_MAX_SAMPLES", BERT_MAX_SAMPLES)
+    if len(texts) > max_samples:
+        print(f"  Dataset too large for BERT ({len(texts)} samples). Balanced subsampling...")
         from sklearn.model_selection import train_test_split
         fraud_texts = [t for t, l in zip(texts, labels) if l == 1]
         fraud_labels = [1] * len(fraud_texts)
         safe_texts = [t for t, l in zip(texts, labels) if l == 0]
         safe_labels = [0] * len(safe_texts)
-        n_per_class = MAX_BERT_SAMPLES // 2
+        n_per_class = max_samples // 2
         if len(fraud_texts) > n_per_class:
             fraud_texts, _, fraud_labels, _ = train_test_split(
                 fraud_texts, fraud_labels,
@@ -127,6 +153,8 @@ def train():
     n_fraud = sum(labels)
     n_safe  = total - n_fraud
     print(f"\n  Total: {total}  |  Fraud: {n_fraud}  |  Safe: {n_safe}")
+    device_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU"
+    print(f"  Torch: {torch.__version__}  |  CUDA available: {torch.cuda.is_available()}  |  Device: {device_name}")
     print("\n[2/5] Loading tokenizer...")
     tokenizer = DistilBertTokenizer.from_pretrained(BERT_MODEL_NAME)
     print("[3/5] Splitting data...")
@@ -139,8 +167,20 @@ def train():
         stratify=stratify,
     )
     print(f"  Train: {len(train_texts)}  |  Eval: {len(eval_texts)}")
-    train_dataset = FraudDataset(train_texts, train_labels, tokenizer, BERT_MAX_LENGTH)
-    eval_dataset  = FraudDataset(eval_texts, eval_labels, tokenizer, BERT_MAX_LENGTH)
+    max_length = env_int("BERT_MAX_LENGTH", BERT_MAX_LENGTH)
+    train_batch = env_int("BERT_TRAIN_BATCH", BERT_TRAIN_BATCH)
+    eval_batch = env_int("BERT_EVAL_BATCH", BERT_EVAL_BATCH)
+    grad_accum = env_int("BERT_GRADIENT_ACCUMULATION_STEPS", BERT_GRADIENT_ACCUMULATION_STEPS)
+    epochs = env_float("BERT_TRAIN_EPOCHS", BERT_TRAIN_EPOCHS)
+    warmup_steps = env_int("BERT_WARMUP_STEPS", BERT_WARMUP_STEPS)
+    fp16_enabled = torch.cuda.is_available() and os.getenv("BERT_FP16", "1") != "0"
+    print(
+        "  Training profile: "
+        f"max_length={max_length}, batch={train_batch}, eval_batch={eval_batch}, "
+        f"grad_accum={grad_accum}, epochs={epochs}, fp16={fp16_enabled}"
+    )
+    train_dataset = FraudDataset(train_texts, train_labels, tokenizer, max_length)
+    eval_dataset  = FraudDataset(eval_texts, eval_labels, tokenizer, max_length)
     print("[4/5] Loading pre-trained DistilBERT...")
     model = DistilBertForSequenceClassification.from_pretrained(
         BERT_MODEL_NAME,
@@ -157,18 +197,21 @@ def train():
     os.environ["TENSORBOARD_LOGGING_DIR"] = os.path.join(output_dir, "logs")
     training_args = TrainingArguments(
         output_dir=output_dir,
-        num_train_epochs=BERT_TRAIN_EPOCHS,
-        per_device_train_batch_size=BERT_TRAIN_BATCH,
-        per_device_eval_batch_size=BERT_EVAL_BATCH,
+        num_train_epochs=epochs,
+        per_device_train_batch_size=train_batch,
+        per_device_eval_batch_size=eval_batch,
+        gradient_accumulation_steps=grad_accum,
         learning_rate=BERT_LEARNING_RATE,
         weight_decay=BERT_WEIGHT_DECAY,
-        warmup_steps=BERT_WARMUP_STEPS,
+        warmup_steps=warmup_steps,
         eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
         metric_for_best_model="f1",
         logging_steps=50,
         seed=RANDOM_SEED,
+        fp16=fp16_enabled,
+        dataloader_pin_memory=torch.cuda.is_available(),
         report_to="none",  # Disable wandb/mlflow
     )
     class WeightedTrainer(Trainer):

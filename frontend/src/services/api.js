@@ -1,81 +1,111 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import axios from "axios";
+
+// Dynamic API Base: Uses Vercel environment variable in production, falls back to local Vite proxy.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+
+// 🚀 STEP 14 — CREATE AXIOS CLIENT
+export const axiosClient = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Interceptor to attach token
+axiosClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Interceptor to handle 401 globally
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("fs_authed");
+      localStorage.removeItem("fs_user");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export function normalizeConversationMessages(messages) {
   if (!Array.isArray(messages)) return [];
   return messages.map((m) =>
     typeof m === "string" ? { text: m } : { text: m?.text ?? "" }
   );
 }
+
+// Wrapping Axios in your existing `api` function to maintain 100% backward compatibility with your frontend
 async function api(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
-  const headers = { "Content-Type": "application/json", ...options.headers };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  let res;
   try {
-    res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-  } catch {
-    return {
-      error: "Server not reachable. Start the API (uvicorn) or check the URL.",
-      _network: true,
-    };
-  }
-  if (res.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user_id");
-    localStorage.removeItem("fs_authed");
-    return { error: "Session expired. Please sign in again.", _status: 401 };
-  }
-  const contentType = res.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) {
-    return {
-      error: !res.ok
-        ? `Unable to analyze. Try again. (${res.status})`
-        : "Server returned an unexpected response.",
-      _status: res.status,
-    };
-  }
-  const data = await res.json();
-  if (!res.ok) {
-    const detail = data.detail;
+    const res = await axiosClient({
+      url: endpoint,
+      method: options.method || "GET",
+      data: options.body ? JSON.parse(options.body) : undefined,
+    });
+    
+    const data = res.data;
+    if (data.success === true && data.data !== undefined) {
+      return data.data;
+    }
+    if (data.success === false && data.error) {
+      return { error: data.error === "invalid input" ? "Invalid input." : data.error };
+    }
+    if (data.error && typeof data.error === "string" && data.error !== "") {
+      return { error: data.error === "invalid input" ? "Invalid input." : data.error };
+    }
+    return data;
+  } catch (err) {
+    if (!err.response) {
+      return {
+        error: "Server not reachable. Start the API (uvicorn) or check the URL.",
+        _network: true,
+      };
+    }
+    if (err.response.status === 401) {
+      return { error: "Session expired. Please sign in again.", _status: 401 };
+    }
+    const data = err.response.data;
+    const detail = data?.detail;
     const msg =
       typeof detail === "string"
         ? detail
         : Array.isArray(detail)
           ? detail.map((d) => d.msg || d).join("; ")
-          : data.error;
+          : data?.error;
     return {
-      error: msg || `Unable to analyze. Try again. (${res.status})`,
-      _status: res.status,
+      error: msg || `Unable to process request. (${err.response.status})`,
+      _status: err.response.status,
     };
   }
-  if (data.success === true && data.data !== undefined) {
-    return data.data;
-  }
-  if (data.success === false && data.error) {
-    return { error: data.error === "invalid input" ? "Invalid input." : data.error };
-  }
-  if (data.error && typeof data.error === "string" && data.error !== "") {
-    return { error: data.error === "invalid input" ? "Invalid input." : data.error };
-  }
-  return data;
 }
+
 export async function checkHealth() {
   try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) {
-      const data = await res.json();
-      return data.status === "ok";
-    }
-    return false;
+    const res = await axiosClient.get("/health", { timeout: 3000 });
+    return res.data?.status === "healthy" || res.data?.status === "ok";
   } catch {
     return false;
   }
 }
+
 export const authApi = {
   login: (username, password) =>
-    api("/login", { method: "POST", body: JSON.stringify({ username, password }) }),
-  register: (username, password) =>
-    api("/register", { method: "POST", body: JSON.stringify({ username, password }) }),
+    api("/auth/login", { method: "POST", body: JSON.stringify({ email: username, password }) }),
+  register: (name, email, password) =>
+    api("/auth/register", { method: "POST", body: JSON.stringify({ name, email, password }) }),
+  forgotPassword: (email) => 
+    api("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
+  resetPassword: (token, new_password) =>
+    api("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, new_password }) }),
 };
+
 export const analysisApi = {
   analyzeMessage: (text) =>
     api("/analyze-message", { method: "POST", body: JSON.stringify({ text }) }),
@@ -104,11 +134,14 @@ export const analysisApi = {
       method: "POST",
       body: JSON.stringify({ input, result }),
     }),
+  getDashboardStats: () => api("/dashboard-stats"),
 };
+
 export const analyzeMessage = (text) => analysisApi.analyzeMessage(text);
 export const analyzeConversation = (messages, conversation_id) =>
   analysisApi.analyzeConversation(messages, conversation_id);
 export const fetchConversations = () => analysisApi.getConversations();
+
 export const feedbackApi = {
   submit: (data) =>
     api("/feedback", { method: "POST", body: JSON.stringify(data) }),

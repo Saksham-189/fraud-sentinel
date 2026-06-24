@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Navbar, Footer } from "./Landing";
 import { Reveal, StaggerContainer, StaggerItem, HoverCard, HoverButton } from "../components/Motion";
 const individualPlans = [
   {
@@ -91,7 +92,7 @@ function FAQAccordion({ items }) {
     <div className="space-y-4">
       {items.map((item, idx) => (
         <div key={idx} className="border border-surface-variant rounded-xl overflow-hidden bg-white shadow-sm">
-          <button onClick={() => setOpenIdx(openIdx === idx ? null : idx)} className="w-full px-6 py-4 flex justify-between items-center bg-surface-container-lowest hover:bg-slate-50 transition-colors text-left font-semibold text-slate-800">
+          <button onClick={() => setOpenIdx(openIdx === idx ? null : idx)} className="w-full px-6 py-4 flex justify-between items-center glass-card hover:bg-[var(--surface-2)] transition-colors text-left font-semibold text-[var(--text-primary)]">
             {item.q}
             <span className={`material-symbols-outlined text-slate-400 transition-transform duration-200 ${openIdx === idx ? "rotate-180" : ""}`}>expand_more</span>
           </button>
@@ -115,47 +116,30 @@ export default function Pricing() {
     { q: "What happens when I hit the free plan limits?", a: "Once you reach the daily quota, the UI will prompt you to upgrade to continue analysis." }
   ];
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+    <div className="aurora-bg bg-[var(--surface-0)] text-[var(--text-primary)] font-body min-h-screen flex flex-col">
       {}
-      <nav className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-8">
-            <Link className="text-xl font-bold tracking-tight text-slate-900" to="/">FraudSentinel</Link>
-            <div className="hidden md:flex gap-6">
-              {[{ l: "Platform", to: "/" }, { l: "Solutions", to: "/solutions" }, { l: "Developers", to: "/developers" }, { l: "Pricing", active: true }].map(n => (
-                <Link key={n.l} to={n.to || "#"} className={`relative font-medium transition-colors duration-200 group ${n.active ? "text-indigo-600 font-semibold" : "text-slate-600 hover:text-indigo-500"}`}>
-                  {n.l}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-indigo-600 transition-all duration-300 ${n.active ? "w-full" : "w-0 group-hover:w-full"}`}></span>
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/login" className="text-indigo-600 font-medium hover:text-indigo-500 transition-colors">Login</Link>
-            <HoverButton className="bg-primary text-on-primary px-4 py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-shadow">View Demo</HoverButton>
-          </div>
-        </div>
-      </nav>
-      <main className="flex-grow px-6 py-12 max-w-7xl mx-auto flex flex-col gap-16 w-full">
+      <Navbar />
+
+      <main className="flex-grow px-6 py-12 max-w-7xl mx-auto flex flex-col gap-16 w-full relative z-10">
         {}
         <section className="text-center py-12 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10"></div>
           <Reveal>
-            <h1 className="font-headline-xl text-4xl md:text-5xl font-bold text-on-background tracking-tight mb-4">
+            <h1 className="font-headline text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight mb-4">
               Simple, Transparent Pricing
             </h1>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="text-lg text-on-surface-variant max-w-2xl mx-auto mb-6">
+            <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto mb-6">
               Choose the plan that fits your needs — from personal use to scalable fraud analysis.
             </p>
           </Reveal>
           <Reveal delay={0.2}>
             <div className="flex items-center justify-center gap-4 mt-6">
-              <HoverButton className="bg-primary text-on-primary px-8 py-3 rounded-full font-headline-md font-semibold shadow-lg">
+              <HoverButton className="bg-gradient-to-r from-violet-600 to-pink-500 text-white px-8 py-3 rounded-full font-headline font-semibold shadow-glow-violet hover:shadow-glow-violet-lg">
                 Get Started
               </HoverButton>
-              <HoverButton className="bg-white text-slate-700 border border-slate-200 px-8 py-3 rounded-full font-headline-md font-semibold shadow-sm hover:bg-slate-50">
+              <HoverButton className="glass text-[var(--text-primary)] border border-[var(--border-default)] px-8 py-3 rounded-full font-headline font-semibold hover:bg-[var(--surface-2)]">
                 View Plans
               </HoverButton>
             </div>
@@ -164,10 +148,10 @@ export default function Pricing() {
         {}
         <section className="flex justify-center mb-4">
           <div className="flex bg-surface-container border border-surface-variant rounded-full p-1 w-full max-w-sm shadow-inner">
-            <button onClick={() => setPlanType("individual")} className={`flex-1 py-2.5 text-sm font-bold rounded-full transition-all duration-300 ${planType === "individual" ? "bg-white text-primary shadow" : "text-slate-500 hover:text-slate-800"}`}>
+            <button onClick={() => setPlanType("individual")} className={`flex-1 py-2.5 text-sm font-bold rounded-full transition-all duration-300 ${planType === "individual" ? "bg-white text-primary shadow" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}>
               Individual
             </button>
-            <button onClick={() => setPlanType("company")} className={`flex-1 py-2.5 text-sm font-bold rounded-full transition-all duration-300 ${planType === "company" ? "bg-white text-primary shadow" : "text-slate-500 hover:text-slate-800"}`}>
+            <button onClick={() => setPlanType("company")} className={`flex-1 py-2.5 text-sm font-bold rounded-full transition-all duration-300 ${planType === "company" ? "bg-white text-primary shadow" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}>
               Company
             </button>
           </div>
@@ -177,23 +161,23 @@ export default function Pricing() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((p) => (
               <StaggerItem key={p.name}>
-                <HoverCard className="bg-white rounded-2xl border border-surface-variant p-8 flex flex-col h-full shadow-sm hover:shadow-xl transition-shadow relative">
+                <HoverCard className="glass-card rounded-2xl p-8 flex flex-col h-full relative">
                   {p.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-bold px-4 py-1 rounded-full shadow-sm whitespace-nowrap">
                       {p.badge}
                     </div>
                   )}
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-slate-900">{p.name}</h3>
+                    <h3 className="text-2xl font-bold text-[var(--text-primary)]">{p.name}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-slate-900">{p.price}</span>
-                      {p.period && <span className="text-slate-500 font-medium">{p.period}</span>}
+                      <span className="text-4xl font-black text-[var(--text-primary)]">{p.price}</span>
+                      {p.period && <span className="text-[var(--text-tertiary)] font-medium">{p.period}</span>}
                     </div>
                   </div>
                   <div className="flex-grow">
                     <ul className="space-y-4 mt-2">
                       {p.features.map((f) => (
-                        <li key={f} className="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                        <li key={f} className="flex items-start gap-3 text-sm text-[var(--text-secondary)] font-medium">
                           <span className="material-symbols-outlined text-emerald-500 text-[20px] shrink-0">check_circle</span>
                           <span>{f}</span>
                         </li>
@@ -201,7 +185,7 @@ export default function Pricing() {
                     </ul>
                   </div>
                   <div className="mt-8">
-                    <Link to="/login" className={`block w-full text-center py-3.5 rounded-xl font-bold transition-all shadow-sm ${p.badge ? "bg-primary text-white hover:bg-primary/90" : "bg-slate-50 text-slate-800 border border-slate-200 hover:bg-slate-100"}`}>
+                    <Link to="/login" className={`block w-full text-center py-3.5 rounded-xl font-bold transition-all shadow-sm ${p.badge ? "bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:bg-primary/90" : "bg-slate-50 text-[var(--text-primary)] border border-slate-200 hover:bg-slate-100"}`}>
                       {p.cta}
                     </Link>
                   </div>
@@ -213,25 +197,25 @@ export default function Pricing() {
         {}
         <section className="py-12">
           <Reveal>
-            <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">Compare Plans</h2>
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-8 text-center">Compare Plans</h2>
           </Reveal>
           <Reveal delay={0.1}>
             <div className="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-sm">
               <table className="w-full min-w-[700px] border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="py-5 px-6 text-left font-bold text-slate-800 w-1/3">Feature</th>
+                    <th className="py-5 px-6 text-left font-bold text-[var(--text-primary)] w-1/3">Feature</th>
                     {planType === "individual" ? (
                       <>
-                        <th className="py-5 px-6 text-center font-bold text-slate-800">Starter</th>
+                        <th className="py-5 px-6 text-center font-bold text-[var(--text-primary)]">Starter</th>
                         <th className="py-5 px-6 text-center font-bold text-primary">Pro</th>
-                        <th className="py-5 px-6 text-center font-bold text-slate-800">Advanced</th>
+                        <th className="py-5 px-6 text-center font-bold text-[var(--text-primary)]">Advanced</th>
                       </>
                     ) : (
                       <>
-                        <th className="py-5 px-6 text-center font-bold text-slate-800">Team</th>
+                        <th className="py-5 px-6 text-center font-bold text-[var(--text-primary)]">Team</th>
                         <th className="py-5 px-6 text-center font-bold text-primary">Business</th>
-                        <th className="py-5 px-6 text-center font-bold text-slate-800">Enterprise</th>
+                        <th className="py-5 px-6 text-center font-bold text-[var(--text-primary)]">Enterprise</th>
                       </>
                     )}
                   </tr>
@@ -244,9 +228,9 @@ export default function Pricing() {
                     { name: "History", values: ["✕", "✓", "✓", "✓", "✓", "✓"] },
                     { name: "Multi‑user", values: ["✕", "✕", "✕", "✓", "✓", "✓"] },
                     { name: "Priority support", values: ["✕", "✕", "✕", "✓", "✓", "✓"] },
-                  ].map((row, idx) => (
+                  ].map((row) => (
                     <tr key={row.name} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                      <td className="py-4 px-6 font-medium text-slate-700">{row.name}</td>
+                      <td className="py-4 px-6 font-medium text-[var(--text-secondary)]">{row.name}</td>
                       {planType === "individual"
                         ? row.values.slice(0, 3).map((v, i) => (
                             <td key={i} className="py-4 px-6 text-center">
@@ -268,7 +252,7 @@ export default function Pricing() {
         {}
         <section className="py-12">
           <Reveal>
-            <h2 className="text-3xl font-bold text-slate-900 mb-10 text-center">Why FraudSentinel?</h2>
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-10 text-center">Why FraudSentinel?</h2>
           </Reveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -282,8 +266,8 @@ export default function Pricing() {
                   <div className={`w-14 h-14 ${v.bg} ${v.color} rounded-2xl flex items-center justify-center mb-6`}>
                     <span className="material-symbols-outlined text-[28px]">{v.icon}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">{v.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{v.desc}</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{v.title}</h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed">{v.desc}</p>
                 </HoverCard>
               </StaggerItem>
             ))}
@@ -292,7 +276,7 @@ export default function Pricing() {
         {}
         <section className="py-12 max-w-3xl mx-auto w-full">
           <Reveal>
-            <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">Frequently Asked Questions</h2>
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-8 text-center">Frequently Asked Questions</h2>
           </Reveal>
           <Reveal delay={0.1}>
             <FAQAccordion items={faqItems} />
@@ -306,24 +290,13 @@ export default function Pricing() {
           <Reveal className="relative z-10 max-w-2xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">Start Protecting Yourself Today</h2>
             <p className="text-lg text-indigo-100 mb-10">Join thousands of individuals and teams securing their communications with FraudSentinel.</p>
-            <HoverButton scale={1.05} className="bg-white text-primary px-10 py-4 rounded-full font-bold text-lg shadow-xl shadow-indigo-900/50 hover:shadow-2xl transition-all">
+            <HoverButton scale={1.05} className="bg-white text-[var(--text-primary)] px-10 py-4 rounded-full font-bold text-lg shadow-xl shadow-indigo-900/50 hover:shadow-2xl transition-all">
               Try FraudSentinel Free
             </HoverButton>
           </Reveal>
         </section>
       </main>
-      {}
-      <footer className="bg-slate-50 w-full py-12 px-6 border-t border-slate-200 text-sm">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-lg font-bold text-slate-900 tracking-tight">FraudSentinel</div>
-          <div className="flex flex-wrap justify-center gap-6">
-            {["Documentation", "GitHub", "API Reference", "Contact"].map((t) => (
-              <a key={t} className="text-slate-500 hover:text-indigo-600 font-medium transition-colors" href="#">{t}</a>
-            ))}
-          </div>
-          <div className="text-slate-500 font-medium">© 2024 FraudSentinel AI. All rights reserved.</div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

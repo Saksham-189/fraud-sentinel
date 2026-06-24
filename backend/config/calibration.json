@@ -1,0 +1,9 @@
+{
+  "safe_threshold": 0.3,
+  "high_threshold": 0.65,
+  "benign_short_min_probability": 0.02,
+  "benign_short_max_probability": 0.08,
+  "no_behavior_score_cap": 0.15,
+  "no_evidence_score_cap": 0.25,
+  "weak_evidence_score_cap": 0.45
+}

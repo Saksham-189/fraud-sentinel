@@ -33,24 +33,35 @@ def _get_transformer():
             "load": load_transformer,
         }
     return _transformer_module
-def get_lr_probability(text: str) -> float:
+def get_lr_prediction(text: str) -> dict:
     if not text or not isinstance(text, str):
-        return 0.5
+        return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "empty_text"}
     if not _model_loaded:
-        return 0.5
+        return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "model_not_loaded"}
     try:
         from data_pipeline.data_cleaner import clean_text
         cleaned = clean_text(text)
         if not cleaned:
-            return 0.5
+            return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "empty_cleaned_text"}
         vec = _vectorizer.transform([cleaned])
         proba = _model.predict_proba(vec)
         prob = float(proba[0][1])
-        return max(0.0, min(1.0, prob))
+        prob = max(0.0, min(1.0, prob))
+        confidence = max(0.0, min(1.0, abs(prob - 0.5) * 2))
+        return {
+            "probability": prob,
+            "confidence": confidence,
+            "fallback": False,
+            "reason": "ok",
+        }
     except Exception as e:
         import logging
         logging.error(f"[predict.py] LR inference error: {e}")
-        return 0.5
+        return {"probability": 0.5, "confidence": 0.0, "fallback": True, "reason": "inference_error"}
+
+
+def get_lr_probability(text: str) -> float:
+    return get_lr_prediction(text)["probability"]
 def predict_message(text: str, prev_text: str = None) -> dict:
     from core.pipeline import run_message_analysis
     return run_message_analysis(text, prev_text)

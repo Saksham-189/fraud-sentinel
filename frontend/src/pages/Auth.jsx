@@ -1,8 +1,13 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { HoverButton } from "../components/Motion"
-import { authApi, checkHealth } from "../services/api"
+import { checkHealth, authApi } from "../services/api"
+import { useAuth } from "../context/AuthContext"
+
+// ─── Password Strength ──────────────────────────────────────────────
+
 function PasswordStrength({ password }) {
   if (!password) return null;
   let score = 0;
@@ -12,26 +17,41 @@ function PasswordStrength({ password }) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
   const labels = ["Very Weak", "Weak", "Fair", "Strong", "Very Strong"];
-  const colors = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-emerald-500", "bg-emerald-600"];
+  const gradients = [
+    "from-red-500 to-red-400",
+    "from-orange-500 to-amber-400",
+    "from-amber-500 to-yellow-400",
+    "from-emerald-500 to-green-400",
+    "from-cyan-500 to-emerald-400",
+  ];
+  const textColors = ["text-red-500", "text-orange-500", "text-amber-500", "text-emerald-500", "text-cyan-500"];
   const idx = Math.min(score, 4);
   return (
-    <div className="mt-2">
-      <div className="flex gap-1 mb-1">
-        {[0, 1, 2, 3, 4].map(i => (
-          <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= idx ? colors[idx] : 'bg-slate-200'}`}></div>
+    <div className="mt-2.5">
+      <div className="flex gap-1 mb-1.5">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+              i <= idx ? `bg-gradient-to-r ${gradients[idx]}` : "bg-[var(--surface-3)]"
+            }`}
+          />
         ))}
       </div>
-      <p className={`text-[10px] font-bold ${idx >= 3 ? 'text-emerald-600' : idx >= 2 ? 'text-amber-600' : 'text-red-500'}`}>{labels[idx]}</p>
+      <p className={`text-[10px] font-bold ${textColors[idx]}`}>{labels[idx]}</p>
     </div>
   );
 }
+
+// ─── Auth Input ─────────────────────────────────────────────────────
+
 function AuthInput({ label, type = "text", value, onChange, placeholder, error, icon, rightElement, disabled }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
+      <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-1.5">{label}</label>
       <div className="relative">
         {icon && (
-          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">{icon}</span>
+          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-[20px]">{icon}</span>
         )}
         <input
           type={type}
@@ -39,25 +59,38 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, error, 
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full bg-white border rounded-xl ${icon ? 'pl-11' : 'pl-4'} pr-12 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all duration-200 ${error ? 'border-red-400 focus:ring-2 focus:ring-red-200' : 'border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/15'} disabled:opacity-50 disabled:bg-slate-50`}
+          className={`w-full bg-[var(--surface-2)] border rounded-xl ${icon ? "pl-11" : "pl-4"} pr-12 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all duration-200 ${
+            error
+              ? "border-red-500/50 focus:ring-2 focus:ring-red-500/20"
+              : "border-[var(--border-default)] focus:border-accent-violet focus:ring-2 focus:ring-accent-violet/15"
+          } disabled:opacity-50`}
         />
         {rightElement && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {rightElement}
-          </div>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
         )}
       </div>
-      {error && <p className="text-xs text-red-500 font-semibold mt-1.5 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{error}</p>}
+      {error && (
+        <p className="text-xs text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">error</span>{error}
+        </p>
+      )}
     </div>
   );
 }
+
+// ─── Form Variants ──────────────────────────────────────────────────
+
 const formVariants = {
   enter: { opacity: 0, x: 20 },
   center: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -20 },
 };
+
+// ─── Login Form ─────────────────────────────────────────────────────
+
 function LoginForm({ onSwitch }) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -78,48 +111,50 @@ function LoginForm({ onSwitch }) {
     setErrors({}); setApiError(""); setLoading(true);
     try {
       const isOnline = await checkHealth();
-      if (isOnline) {
-        const res = await authApi.login(email, password);
-        if (res.error) {
-          setApiError(res.error);
-          setLoading(false);
-          return;
-        }
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("user_id", res.user_id);
+      if (!isOnline) {
+        setApiError("Server not reachable. Please start the API and try again.");
+        setLoading(false);
+        return;
       }
-      localStorage.setItem("fs_authed", "true");
-      localStorage.setItem("fs_user", JSON.stringify({ name: email.split("@")[0], email }));
+      const res = await login(email, password);
+      if (res.error) {
+        setApiError(res.error);
+        setLoading(false);
+        return;
+      }
       navigate("/dashboard");
     } catch {
-      localStorage.setItem("fs_authed", "true");
-      localStorage.setItem("fs_user", JSON.stringify({ name: email.split("@")[0], email }));
-      navigate("/dashboard");
+      setApiError("Server not reachable. Please try again.");
+      setLoading(false);
     }
   };
   return (
     <motion.form key="login" variants={formVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} onSubmit={handleSubmit} className="space-y-5">
       {apiError && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2.5 text-sm text-red-700 font-medium">
+        <div className="glass-card !rounded-xl px-4 py-3 flex items-center gap-2.5 text-sm text-red-500 font-medium border-l-4 !border-l-red-500">
           <span className="material-symbols-outlined text-[18px]">error</span>{apiError}
         </div>
       )}
-      <AuthInput label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
-      <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" error={errors.password} icon="lock" disabled={loading}
-        rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+      <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
+      <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" error={errors.password} icon="lock" disabled={loading}
+        rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
       />
       <div className="flex justify-end">
-        <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:text-indigo-700 transition-colors">Forgot password?</Link>
+        <Link to="/forgot-password" className="text-xs font-semibold text-accent-violet hover:opacity-80 transition-opacity">Forgot password?</Link>
       </div>
-      <HoverButton type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Signing in...</> : <>Sign In<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
       </HoverButton>
-      <p className="text-center text-sm text-slate-500">Don't have an account? <button type="button" onClick={onSwitch} className="font-semibold text-primary hover:text-indigo-700 transition-colors">Create one</button></p>
+      <p className="text-center text-sm text-[var(--text-secondary)]">Don&apos;t have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Create one</button></p>
     </motion.form>
   );
 }
+
+// ─── Register Form ──────────────────────────────────────────────────
+
 function RegisterForm({ onSwitch }) {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -144,39 +179,41 @@ function RegisterForm({ onSwitch }) {
     setErrors({}); setLoading(true);
     try {
       const isOnline = await checkHealth();
-      if (isOnline) {
-        const reg = await authApi.register(email, password);
-        if (reg.error) { setErrors({ email: reg.error }); setLoading(false); return; }
-        const login = await authApi.login(email, password);
-        if (login.token) {
-          localStorage.setItem("token", login.token);
-          localStorage.setItem("user_id", login.user_id);
-        }
+      if (!isOnline) {
+        setErrors({ email: "Server not reachable. Please start the API and try again." });
+        setLoading(false);
+        return;
       }
+      const reg = await register(name, email, password);
+      if (reg.error) { setErrors({ email: reg.error }); setLoading(false); return; }
     } catch {
+      setErrors({ email: "Server not reachable. Please try again." });
+      setLoading(false);
+      return;
     }
-    localStorage.setItem("fs_authed", "true");
-    localStorage.setItem("fs_user", JSON.stringify({ name, email }));
     navigate("/dashboard");
   };
   return (
     <motion.form key="register" variants={formVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} onSubmit={handleSubmit} className="space-y-4">
-      <AuthInput label="Full Name" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" error={errors.name} icon="person" disabled={loading} />
-      <AuthInput label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
+      <AuthInput label="Full Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" error={errors.name} icon="person" disabled={loading} />
+      <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
       <div>
-        <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
-          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+        <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
+          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
         />
         <PasswordStrength password={password} />
       </div>
-      <AuthInput label="Confirm Password" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+      <AuthInput label="Confirm Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
+      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Creating account...</> : <>Create Account<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
       </HoverButton>
-      <p className="text-center text-sm text-slate-500">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-primary hover:text-indigo-700 transition-colors">Sign in</button></p>
+      <p className="text-center text-sm text-[var(--text-secondary)]">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Sign in</button></p>
     </motion.form>
   );
 }
+
+// ─── Forgot Password ────────────────────────────────────────────────
+
 function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -186,18 +223,24 @@ function ForgotPasswordForm() {
     ev.preventDefault();
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError("Enter a valid email address"); return; }
     setError(""); setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSent(true); setLoading(false);
+    try {
+      const res = await authApi.forgotPassword(email);
+      if (res.error) { setError(res.error); } else { setSent(true); }
+    } catch {
+      setError("Server not reachable.");
+    } finally {
+      setLoading(false);
+    }
   };
   if (sent) {
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-8">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-emerald-600 text-[32px]">mark_email_read</span>
+        <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow-cyan">
+          <span className="material-symbols-outlined text-white text-[32px]">mark_email_read</span>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Check your email</h2>
-        <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto">We've sent password reset instructions to <strong className="text-slate-700">{email}</strong></p>
-        <Link to="/login" className="text-sm font-semibold text-primary hover:text-indigo-700 transition-colors flex items-center justify-center gap-1">
+        <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-2">Check your email</h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-xs mx-auto">We&apos;ve sent password reset instructions to <strong className="text-[var(--text-primary)]">{email}</strong></p>
+        <Link to="/login" className="text-sm font-semibold text-accent-violet hover:opacity-80 transition-opacity flex items-center justify-center gap-1">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>Back to Sign In
         </Link>
       </motion.div>
@@ -206,22 +249,25 @@ function ForgotPasswordForm() {
   return (
     <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="space-y-5">
       <div className="text-center mb-4">
-        <div className="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="material-symbols-outlined text-primary text-[28px]">lock_reset</span>
+        <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
+          <span className="material-symbols-outlined text-white text-[28px]">lock_reset</span>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-1">Reset your password</h2>
-        <p className="text-sm text-slate-500">Enter your email and we'll send you instructions.</p>
+        <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-1">Reset your password</h2>
+        <p className="text-sm text-[var(--text-secondary)]">Enter your email and we&apos;ll send you instructions.</p>
       </div>
-      <AuthInput label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" error={error} icon="mail" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+      <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={error} icon="mail" disabled={loading} />
+      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet transition-all disabled:opacity-50 flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Sending...</> : "Send Reset Link"}
       </HoverButton>
-      <Link to="/login" className="block text-center text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+      <Link to="/login" className="block text-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
         <span className="material-symbols-outlined text-[14px] align-middle mr-1">arrow_back</span>Back to Sign In
       </Link>
     </motion.form>
   );
 }
+
+// ─── Reset Password ─────────────────────────────────────────────────
+
 function ResetPasswordForm() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -236,45 +282,75 @@ function ResetPasswordForm() {
     else if (password.length < 6) e.password = "Minimum 6 characters";
     if (password !== confirm) e.confirm = "Passwords don't match";
     if (Object.keys(e).length) { setErrors(e); return; }
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get("token");
+    if (!token) {
+      setErrors({ general: "Invalid or missing reset token. Please request a new link." });
+      return;
+    }
     setErrors({}); setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    navigate("/login");
+    try {
+      const res = await authApi.resetPassword(token, password);
+      if (res.error) { setErrors({ general: res.error }); } else { navigate("/login"); }
+    } catch {
+      setErrors({ general: "Server not reachable." });
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="space-y-5">
       <div className="text-center mb-4">
-        <div className="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="material-symbols-outlined text-primary text-[28px]">password</span>
+        <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
+          <span className="material-symbols-outlined text-white text-[28px]">password</span>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-1">Set new password</h2>
-        <p className="text-sm text-slate-500">Your new password must be different from previous ones.</p>
+        <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-1">Set new password</h2>
+        <p className="text-sm text-[var(--text-secondary)]">Your new password must be different from previous ones.</p>
       </div>
+      {errors.general && (
+        <div className="glass-card !rounded-xl px-4 py-3 flex items-center gap-2.5 text-sm text-red-500 font-medium border-l-4 !border-l-red-500">
+          <span className="material-symbols-outlined text-[18px]">error</span>{errors.general}
+        </div>
+      )}
       <div>
-        <AuthInput label="New Password" type={showPw ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
-          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-slate-400 hover:text-slate-600"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+        <AuthInput label="New Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
+          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
         />
         <PasswordStrength password={password} />
       </div>
-      <AuthInput label="Confirm New Password" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+      <AuthInput label="Confirm New Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
+      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet transition-all disabled:opacity-50 flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Resetting...</> : "Reset Password"}
       </HoverButton>
     </motion.form>
   );
 }
+
+// ─── Auth Guard ─────────────────────────────────────────────────────
+
 export function AuthGuard({ children }) {
-  const isAuthed = localStorage.getItem("fs_authed") === "true";
+  const { isAuthenticated, loading } = useAuth();
+  const isAuthed = isAuthenticated && Boolean(localStorage.getItem("token"));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--surface-0)] flex items-center justify-center p-6">
+        <span className="material-symbols-outlined animate-spin text-[40px] text-accent-violet">progress_activity</span>
+      </div>
+    );
+  }
+
   if (!isAuthed) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white border border-slate-200 rounded-2xl p-8 max-w-sm w-full text-center shadow-xl">
-          <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <span className="material-symbols-outlined text-amber-600 text-[28px]">lock</span>
+      <div className="min-h-screen aurora-bg bg-[var(--surface-0)] flex items-center justify-center p-6">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-strong rounded-2xl p-8 max-w-sm w-full text-center shadow-xl relative z-10">
+          <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
+            <span className="material-symbols-outlined text-white text-[28px]">lock</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Authentication Required</h2>
-          <p className="text-sm text-slate-500 mb-6">Please sign in to access this page.</p>
+          <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-2">Authentication Required</h2>
+          <p className="text-sm text-[var(--text-secondary)] mb-6">Please sign in to access this page.</p>
           <Link to="/login">
-            <HoverButton className="bg-primary text-white px-8 py-2.5 rounded-xl font-semibold text-sm shadow-md w-full">
+            <HoverButton className="bg-gradient-to-r from-violet-600 to-pink-500 text-white px-8 py-2.5 rounded-xl font-semibold text-sm shadow-glow-violet w-full">
               Sign In
             </HoverButton>
           </Link>
@@ -284,26 +360,42 @@ export function AuthGuard({ children }) {
   }
   return children;
 }
+
+// ─── Perform Logout ─────────────────────────────────────────────────
+
 export function performLogout(navigate) {
   localStorage.removeItem("fs_authed");
   localStorage.removeItem("fs_user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user_id");
   navigate("/login");
 }
+
+// ─── Main Auth Page ─────────────────────────────────────────────────
+
 export default function Auth() {
   const location = useLocation();
   const isRegisterRoute = location.pathname === "/register";
   const isForgotRoute = location.pathname === "/forgot-password";
   const isResetRoute = location.pathname === "/reset-password";
   const [mode, setMode] = useState(isRegisterRoute ? "register" : "login");
+
   const getContent = () => {
     if (isForgotRoute) return <ForgotPasswordForm />;
     if (isResetRoute) return <ResetPasswordForm />;
     return (
       <>
-        {}
-        <div className="flex bg-slate-100 rounded-xl p-1 mb-8">
-          <button onClick={() => setMode("login")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === "login" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>Sign In</button>
-          <button onClick={() => setMode("register")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${mode === "register" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>Register</button>
+        {/* Tab Toggle */}
+        <div className="flex bg-[var(--surface-2)] rounded-xl p-1 mb-8 relative">
+          <button onClick={() => setMode("login")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all relative z-10 ${mode === "login" ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"}`}>Sign In</button>
+          <button onClick={() => setMode("register")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all relative z-10 ${mode === "register" ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"}`}>Register</button>
+          {/* Sliding indicator */}
+          <motion.div
+            layout
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-[var(--surface-1)] shadow-sm"
+            style={{ left: mode === "login" ? 4 : "calc(50% + 2px)" }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          />
         </div>
         <AnimatePresence mode="wait">
           {mode === "login" ? <LoginForm key="l" onSwitch={() => setMode("register")} /> : <RegisterForm key="r" onSwitch={() => setMode("login")} />}
@@ -311,64 +403,50 @@ export default function Auth() {
       </>
     );
   };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex font-body-md text-slate-900">
-      {}
-      <div className="hidden lg:flex w-[45%] bg-gradient-to-br from-indigo-600 via-primary to-violet-700 relative overflow-hidden flex-col justify-between p-12 text-white">
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-[28px]">shield_locked</span>
-            <span className="font-headline-md font-bold text-xl tracking-tight">FraudSentinel</span>
-          </Link>
-        </div>
-        <div className="relative z-10 max-w-md">
-          <h2 className="text-3xl font-bold leading-snug mb-4">Analyze conversations.<br/>Detect fraud.<br/>Stay secure.</h2>
-          <p className="text-white/70 leading-relaxed text-sm">FraudSentinel uses hybrid AI to detect social engineering, phishing, and credential theft in real-time — all processed locally on your device.</p>
-          <div className="mt-10 space-y-4">
-            {[
-              { icon: "psychology", text: "Behavioral analysis engine" },
-              { icon: "speed", text: "Sub-50ms response time" },
-              { icon: "lock", text: "100% offline processing" },
-            ].map(f => (
-              <div key={f.text} className="flex items-center gap-3 text-white/90">
-                <div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[20px]">{f.icon}</span>
-                </div>
-                <span className="text-sm font-medium">{f.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <p className="text-white/40 text-xs relative z-10">© 2026 FraudSentinel. All rights reserved.</p>
+    <div className="min-h-screen aurora-bg bg-[var(--surface-0)] flex items-center justify-center p-6 font-body">
+      {/* Decorative floating glass shapes */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[15%] left-[10%] w-32 h-32 rounded-3xl bg-violet-500/5 backdrop-blur-sm border border-violet-500/10 rotate-12 animate-float" />
+        <div className="absolute bottom-[20%] right-[15%] w-24 h-24 rounded-full bg-pink-500/5 backdrop-blur-sm border border-pink-500/10 animate-float" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-[60%] left-[5%] w-20 h-20 rounded-2xl bg-cyan-500/5 backdrop-blur-sm border border-cyan-500/10 -rotate-12 animate-float" style={{ animationDelay: "2s" }} />
       </div>
-      {}
-      <div className="flex-grow flex items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-md">
-          {}
-          <div className="lg:hidden text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2 text-slate-900">
-              <span className="material-symbols-outlined text-primary text-[28px]">shield_locked</span>
-              <span className="font-headline-md font-bold text-xl tracking-tight">FraudSentinel</span>
+
+      {/* Auth Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-md relative z-10"
+      >
+        <div className="glass-strong rounded-2xl p-8 md:p-10 glow-border">
+          {/* Logo */}
+          <div className="text-center mb-6">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <span className="material-symbols-outlined text-accent-violet text-[28px]">shield_locked</span>
+              <span className="font-headline font-bold text-xl gradient-text tracking-tight">FraudSentinel</span>
             </Link>
           </div>
+
           {!isForgotRoute && !isResetRoute && (
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-slate-900 mb-1">
+              <h1 className="text-2xl font-headline font-bold text-[var(--text-primary)] mb-1">
                 {mode === "login" ? "Welcome back" : "Get started"}
               </h1>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-secondary)]">
                 {mode === "login" ? "Sign in to your fraud detection dashboard" : "Create your free account to start analyzing"}
               </p>
             </div>
           )}
+
           {getContent()}
-          <p className="text-center text-xs text-slate-400 mt-8">
-            By continuing you agree to our <a href="#" className="text-primary hover:text-indigo-700">Terms</a> and <a href="#" className="text-primary hover:text-indigo-700">Privacy Policy</a>
+
+          <p className="text-center text-xs text-[var(--text-tertiary)] mt-8">
+            By continuing you agree to our <a href="#" className="text-accent-violet hover:opacity-80">Terms</a> and <a href="#" className="text-accent-violet hover:opacity-80">Privacy Policy</a>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
