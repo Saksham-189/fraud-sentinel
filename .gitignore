@@ -63,6 +63,8 @@ backend/processed/real_data.json
 processed/real_data.json
 backend/models/__pycache__/
 backend/models/*.pkl
+!backend/models/fraud_model.pkl
+!backend/models/vectorizer.pkl
 backend/models/distilbert_model/
 backend/models/distilbert_training_output/
 backend/models/logs/
