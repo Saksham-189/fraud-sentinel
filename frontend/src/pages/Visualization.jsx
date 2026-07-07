@@ -497,7 +497,7 @@ function MetadataAndExport({ report, onToast }) {
       await navigator.share(shareData);
     } else {
       await navigator.clipboard.writeText(window.location.href);
-      onToast("Report link copied", "Share the copied link with your team.");
+      onToast("Report link copied", "Share the copied link when you need to report or document the analysis.");
     }
   };
 

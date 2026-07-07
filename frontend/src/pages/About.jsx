@@ -28,7 +28,7 @@ export default function About() {
                 </div>
                 <h3 className="text-2xl font-headline font-bold text-[var(--text-primary)] mb-4">Our Mission</h3>
                 <p className="text-[var(--text-secondary)] leading-relaxed">
-                  To provide democratized, enterprise-grade fraud detection that is explainable, privacy-conscious, and practical for individual users. We believe that everyone deserves protection from increasingly sophisticated scams.
+                  To provide explainable, privacy-conscious fraud detection that is practical for individual users. We believe that everyone deserves protection from increasingly sophisticated scams.
                 </p>
               </HoverCard>
             </StaggerItem>
@@ -39,7 +39,7 @@ export default function About() {
                 </div>
                 <h3 className="text-2xl font-headline font-bold mb-4 text-[var(--text-primary)]">Our Vision</h3>
                 <p className="text-[var(--text-secondary)] leading-relaxed">
-                  A digital ecosystem where malicious intent is neutralized instantly at the edge, before it ever reaches the user's inbox, chat thread, or text messages.
+                  A digital experience where suspicious intent is easier to understand before the user replies, clicks, or shares sensitive information.
                 </p>
               </HoverCard>
             </StaggerItem>
@@ -58,7 +58,7 @@ export default function About() {
               {[
                 { icon: "lock", title: "Privacy First", desc: "Your messages are used only for fraud detection inside the FraudSentinel backend and are not sent to third-party AI APIs." },
                 { icon: "psychology", title: "Behavioral Analysis", desc: "We don't just look for bad words. We look for bad intentions—urgency, fear, and manipulation." },
-                { icon: "bolt", title: "Real-time Speed", desc: "Security is useless if it's slow. Our hybrid engine returns complex analysis in under 50 milliseconds." }
+                { icon: "bolt", title: "Fast Feedback", desc: "The product is designed to return useful analysis quickly enough to help you decide before you act." }
               ].map((value, i) => (
                 <StaggerItem key={i}>
                   <div className="glass-card p-8 text-center rounded-3xl hover:border-accent-violet/50 transition-colors h-full group">

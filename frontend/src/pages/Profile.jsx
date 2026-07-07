@@ -81,7 +81,7 @@ function AccountDetails({ profile }) {
         <h2 className="font-headline font-bold text-lg text-[var(--text-primary)] flex items-center gap-2">
           <span className="material-symbols-outlined text-accent-violet text-[20px]">badge</span> Account Details
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">Identity and subscription information for this workspace.</p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">Identity and subscription information for your account.</p>
       </div>
       <DetailRow label="Full name" value={profile.name || "User"} />
       <DetailRow label="Email" value={profile.email || "Not available"} />
@@ -233,7 +233,7 @@ export default function Profile() {
               <div>
                 <p className="text-sm font-bold text-accent-violet uppercase tracking-wide">Account Center</p>
                 <h1 className="text-3xl font-headline font-bold text-[var(--text-primary)] tracking-tight">Profile</h1>
-                <p className="text-[var(--text-secondary)] mt-1">Manage your identity, security status, and workspace preferences.</p>
+                <p className="text-[var(--text-secondary)] mt-1">Manage your identity, security status, and account preferences.</p>
               </div>
               {loading && (
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-tertiary)]">

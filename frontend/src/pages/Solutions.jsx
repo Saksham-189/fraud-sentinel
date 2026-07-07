@@ -214,9 +214,9 @@ function InteractiveDemo() {
 function ValueSection() {
   const cards = [
     { icon: "block", title: "Avoid Costly Mistakes", desc: "Catch sophisticated fraud before financial loss occurs." },
-    { icon: "speed", title: "Identify Scams Faster", desc: "Sub-millisecond analysis provides instant protection." },
+    { icon: "speed", title: "Identify Scams Faster", desc: "Fast analysis helps you decide before responding." },
     { icon: "hub", title: "Understand Patterns", desc: "Gain deep insights into attacker methodologies." },
-    { icon: "lock", title: "Stay in Control", desc: "Your data remains entirely on your own infrastructure." }
+    { icon: "lock", title: "Stay in Control", desc: "Analysis stays inside your FraudSentinel backend and avoids third-party AI APIs." }
   ]
   return (
     <section className="py-24 px-6 max-w-[1440px] mx-auto">
@@ -241,7 +241,7 @@ function FutureSection() {
       <Reveal>
         <div className="max-w-3xl mx-auto glass p-12 rounded-3xl border border-[var(--border-default)] shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
           <span className="material-symbols-outlined text-[40px] text-accent-violet mb-6">rocket_launch</span>
-          <h2 className="text-2xl md:text-3xl font-headline font-bold text-[var(--text-primary)] leading-tight">Built for individuals today, scalable for fintech and enterprise security tomorrow.</h2>
+          <h2 className="text-2xl md:text-3xl font-headline font-bold text-[var(--text-primary)] leading-tight">Built for individuals today, with room to grow into broader fraud intelligence workflows.</h2>
         </div>
       </Reveal>
     </section>

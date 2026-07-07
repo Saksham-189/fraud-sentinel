@@ -53,16 +53,16 @@ def get_allowed_origins() -> list[str]:
 
 app = FastAPI(
     title="Fraud Sentinel API",
-    description="Offline Fraud Detection System",
+    description="Fraud intelligence API for scam, phishing, and social engineering analysis.",
     version="1.0"
 )
 
-# 🚀 STEP 20 — RATE LIMIT LOGIN (SlowAPI)
+# Rate limit login and other protected endpoints with SlowAPI.
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 🚀 STEP 22 — ENABLE HTTPS ONLY (Conditional for prod)
+# Enable HTTPS redirects only when the app is explicitly running in production.
 if os.environ.get("ENV") == "production":
     app.add_middleware(HTTPSRedirectMiddleware)
 
@@ -319,7 +319,7 @@ def forgot_password(request: Request, req: ForgotPasswordRequest, db: Session = 
     db_user.reset_token_expires = (datetime.now() + timedelta(minutes=15)).isoformat()
     db.commit()
     
-    # 🔥 STEP 23 — MOCK EMAIL VERIFICATION
+    # Development reset-token placeholder. Production should send email through a provider.
     if os.environ.get("ENV") != "production":
         logger.info(f"[EMAIL SERVICE] Password reset token generated for {req.email}")
     

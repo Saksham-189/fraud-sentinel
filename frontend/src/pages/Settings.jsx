@@ -55,7 +55,7 @@ function ThemePreview({ theme, active, onClick }) {
         </div>
       </div>
       <p className="font-headline font-bold text-[var(--text-primary)] mt-3 capitalize">{theme}</p>
-      <p className="text-xs text-[var(--text-secondary)] mt-1">{dark ? "Default, cinematic workspace." : "Bright, calm everyday mode."}</p>
+      <p className="text-xs text-[var(--text-secondary)] mt-1">{dark ? "Default, cinematic app mode." : "Bright, calm everyday mode."}</p>
     </button>
   );
 }
@@ -99,7 +99,7 @@ export default function Settings() {
             <StaggerItem>
               <section className="glass-card p-5 md:p-6">
                 <h2 className="text-lg font-headline font-bold text-[var(--text-primary)]">Theme</h2>
-                <p className="text-sm text-[var(--text-secondary)] mt-1 mb-5">Dark mode is the default. Switch to light mode when you want a brighter workspace.</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-1 mb-5">Dark mode is the default. Switch to light mode when you want a brighter interface.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ThemePreview theme="dark" active={theme === "dark"} onClick={() => chooseTheme("dark")} />
                   <ThemePreview theme="light" active={theme === "light"} onClick={() => chooseTheme("light")} />

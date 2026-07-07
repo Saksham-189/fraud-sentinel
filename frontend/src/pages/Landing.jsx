@@ -52,7 +52,7 @@ function HeroSection() {
       <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="w-full lg:w-1/2 flex flex-col gap-6 relative z-10">
         <Reveal><h1 className="font-headline-xl text-headline-xl text-on-background">Stop Fraud with Intelligent Conversation Analysis</h1></Reveal>
-        <Reveal delay={0.1}><p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Analyze messages and conversations using AI to detect scams and fraud. Secure your enterprise with precision.</p></Reveal>
+        <Reveal delay={0.1}><p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Analyze suspicious messages and conversations with evidence-backed fraud intelligence and clear next steps.</p></Reveal>
         <Reveal delay={0.2}>
           <div className="flex items-center gap-4 mt-4">
             <m.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
@@ -262,7 +262,7 @@ function ComprehensiveSection() {
       <div className="max-w-[1440px] mx-auto">
         <Reveal><div className="text-center mb-16">
           <h2 className="font-headline-lg text-headline-lg text-on-background mb-4">Comprehensive Protection Toolkit</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">Everything you need to secure your communication channels, built with privacy and precision at its core.</p>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">Everything you need to understand suspicious messages, review evidence, and decide what to do next.</p>
         </div></Reveal>
         {}
         <Reveal><div className="bg-surface-container-lowest rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-surface-variant p-10 md:p-16 mb-12 flex flex-col md:flex-row items-center gap-12">
@@ -314,7 +314,7 @@ function ComprehensiveSection() {
   )
 }
 function CTASection() {
-  const badges = ["14-day free trial", "No credit card required", "Full API access", "24/7 support"]
+  const badges = ["Free to start", "No credit card required", "Clear evidence", "Actionable reports"]
   return (
     <section className="w-full bg-[#0c111d] py-28 px-6 text-center relative overflow-hidden">
       {}
@@ -330,7 +330,7 @@ function CTASection() {
           Start Detecting Fraud Now
         </h2>
         <p className="font-body-lg text-body-lg text-slate-400 max-w-xl">
-          Join thousands of companies using FraudSentinel to protect their customers and prevent financial losses.
+          Use FraudSentinel to understand suspicious messages before you reply, click, or share sensitive information.
         </p>
         {}
         <div className="flex justify-center gap-4 mt-2">
@@ -338,9 +338,9 @@ function CTASection() {
             Get Started Free
             <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
           </Link>
-          <button className="border border-slate-600 text-slate-300 px-7 py-3.5 rounded-full font-headline-md text-body-md font-semibold hover:bg-white/5 hover:border-slate-500 transition-all duration-200">
-            Talk to Sales
-          </button>
+          <Link to="/solutions" className="border border-slate-600 text-slate-300 px-7 py-3.5 rounded-full font-headline-md text-body-md font-semibold hover:bg-white/5 hover:border-slate-500 transition-all duration-200">
+            See How It Works
+          </Link>
         </div>
         {}
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mt-6">
