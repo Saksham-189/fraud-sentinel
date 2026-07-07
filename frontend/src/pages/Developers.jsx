@@ -215,10 +215,10 @@ function PrivacySection() {
           <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20">
             <span className="material-symbols-outlined text-[32px]">security</span>
           </div>
-          <div className="bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-4">Offline Mode Enabled</div>
+          <div className="bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-4">Privacy Mode Enabled</div>
           <h2 className="text-3xl font-headline font-bold text-[var(--text-primary)] mb-4">Privacy-First Architecture</h2>
           <p className="text-lg text-[var(--text-secondary)] max-w-lg leading-relaxed">
-            All data processing, including transformer inference, runs locally on your infrastructure. No external APIs required. Your conversation data never leaves your environment.
+            Analysis runs through the FraudSentinel backend you deploy. The runtime is designed to avoid third-party AI API calls and keep fraud analysis inside your controlled service boundary.
           </p>
         </div>
       </Reveal>

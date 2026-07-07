@@ -127,7 +127,7 @@ function Solution4() {
           <div className="bg-emerald-500/10 text-emerald-500 w-fit px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Use Case 4</div>
           <h2 className="font-headline text-[36px] font-bold text-[var(--text-primary)] leading-tight">Keep Your Data Private</h2>
           <p className="text-lg text-[var(--text-secondary)] mt-4 leading-relaxed">
-            All processing happens locally — your data never leaves your system. Built from the ground up for maximum privacy.
+            Messages are analyzed by your FraudSentinel backend and are not sent to third-party AI APIs. Built for a clear, controlled privacy boundary.
           </p>
         </Reveal>
       </div>
@@ -140,7 +140,7 @@ function Solution4() {
                   <span className="material-symbols-outlined text-emerald-500 text-[40px]">shield_lock</span>
                </motion.div>
                <div className="mt-6 bg-emerald-500/10 text-emerald-500 px-4 py-1.5 rounded-full font-bold text-sm border border-emerald-500/20 relative z-10">
-                 OFFLINE MODE ACTIVE
+                 PRIVACY MODE ACTIVE
                </div>
             </div>
           </Float>

@@ -28,7 +28,7 @@ export default function About() {
                 </div>
                 <h3 className="text-2xl font-headline font-bold text-[var(--text-primary)] mb-4">Our Mission</h3>
                 <p className="text-[var(--text-secondary)] leading-relaxed">
-                  To provide democratized, enterprise-grade fraud detection that operates locally and respects user privacy. We believe that everyone deserves protection from increasingly sophisticated scams.
+                  To provide democratized, enterprise-grade fraud detection that is explainable, privacy-conscious, and practical for individual users. We believe that everyone deserves protection from increasingly sophisticated scams.
                 </p>
               </HoverCard>
             </StaggerItem>
@@ -56,7 +56,7 @@ export default function About() {
             </Reveal>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { icon: "lock", title: "Privacy First", desc: "Our models run locally. Your conversations never leave your network unless you explicitly share them." },
+                { icon: "lock", title: "Privacy First", desc: "Your messages are used only for fraud detection inside the FraudSentinel backend and are not sent to third-party AI APIs." },
                 { icon: "psychology", title: "Behavioral Analysis", desc: "We don't just look for bad words. We look for bad intentions—urgency, fear, and manipulation." },
                 { icon: "bolt", title: "Real-time Speed", desc: "Security is useless if it's slow. Our hybrid engine returns complex analysis in under 50 milliseconds." }
               ].map((value, i) => (

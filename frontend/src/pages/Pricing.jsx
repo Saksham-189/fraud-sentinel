@@ -110,8 +110,8 @@ export default function Pricing() {
   const [planType, setPlanType] = useState("individual"); // "individual" | "company"
   const plans = planType === "individual" ? individualPlans : companyPlans;
   const faqItems = [
-    { q: "Is my data private?", a: "Yes – all analysis runs locally on your machine. No data is sent to external services." },
-    { q: "Does this work offline?", a: "Absolutely. The core engine, including the transformer model, works fully offline." },
+    { q: "Is my data private?", a: "Yes. Messages are processed by your FraudSentinel backend for fraud detection and are not sent to third-party AI APIs." },
+    { q: "Does this work offline?", a: "The hosted SaaS version requires the backend API. Local development can run the frontend, backend, and models on your own machine." },
     { q: "Can I upgrade later?", a: "You can switch plans at any time from your dashboard – upgrades are immediate." },
     { q: "What happens when I hit the free plan limits?", a: "Once you reach the daily quota, the UI will prompt you to upgrade to continue analysis." }
   ];
@@ -258,7 +258,7 @@ export default function Pricing() {
             {[
               { icon: "shield", title: "Prevent costly mistakes", desc: "Stop scams before they hit your account.", color: "text-primary", bg: "bg-indigo-50" },
               { icon: "visibility", title: "Understand risk quickly", desc: "Clear insights let you make confident decisions.", color: "text-blue-600", bg: "bg-blue-50" },
-              { icon: "privacy_tip", title: "Data stays private", desc: "All processing runs locally, no external APIs.", color: "text-emerald-600", bg: "bg-emerald-50" },
+              { icon: "privacy_tip", title: "Data stays controlled", desc: "Analysis stays within your FraudSentinel backend, with no third-party AI API calls.", color: "text-emerald-600", bg: "bg-emerald-50" },
               { icon: "auto_awesome", title: "AI‑powered support", desc: "Leverage hybrid models for accurate detection.", color: "text-purple-600", bg: "bg-purple-50" },
             ].map((v) => (
               <StaggerItem key={v.title}>

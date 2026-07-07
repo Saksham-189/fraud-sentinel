@@ -270,11 +270,11 @@ function ComprehensiveSection() {
             <div className="bg-primary/10 text-primary w-fit px-3 py-1 rounded-full font-label-caps flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px]">verified_user</span> Flagship Feature
             </div>
-            <h3 className="font-headline-xl text-headline-xl text-on-background">Offline-First Security</h3>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">Analyze sensitive messages with complete privacy. All processing happens locally — no data is sent to external servers. Your communication stays yours.</p>
+            <h3 className="font-headline-xl text-headline-xl text-on-background">Privacy-First Analysis</h3>
+            <p className="font-body-lg text-body-lg text-on-surface-variant">Analyze sensitive messages through your own FraudSentinel backend. Data is used only for fraud detection and is not sent to third-party AI APIs.</p>
             <div className="flex items-center gap-4 mt-2">
-              <div className="flex items-center gap-2 text-on-surface"><span className="material-symbols-outlined text-primary">check_circle</span><span className="font-body-sm font-medium">Zero Data Exfiltration</span></div>
-              <div className="flex items-center gap-2 text-on-surface"><span className="material-symbols-outlined text-primary">check_circle</span><span className="font-body-sm font-medium">Air-gapped Compatible</span></div>
+              <div className="flex items-center gap-2 text-on-surface"><span className="material-symbols-outlined text-primary">check_circle</span><span className="font-body-sm font-medium">No third-party AI API</span></div>
+              <div className="flex items-center gap-2 text-on-surface"><span className="material-symbols-outlined text-primary">check_circle</span><span className="font-body-sm font-medium">Controlled data boundary</span></div>
             </div>
           </div>
           <div className="w-full md:w-1/2 bg-surface-container rounded-xl p-8 flex items-center justify-center min-h-[300px] border border-surface-variant/50 relative overflow-hidden">
@@ -282,8 +282,8 @@ function ComprehensiveSection() {
               <div className="w-24 h-24 bg-surface-container-lowest rounded-2xl shadow-lg border border-surface-variant flex items-center justify-center mb-6"><span className="material-symbols-outlined text-[48px] text-primary">dns</span></div>
               <div className="bg-surface-container-lowest px-6 py-4 rounded-xl shadow-md border border-surface-variant text-center">
                 <div className="flex justify-center mb-2"><span className="material-symbols-outlined text-[32px] text-secondary">shield</span></div>
-                <div className="font-headline-md text-on-surface">Local Processing</div>
-                <div className="font-body-sm text-outline mt-1">No outbound connections</div>
+                <div className="font-headline-md text-on-surface">Secure Backend Analysis</div>
+                <div className="font-body-sm text-outline mt-1">Purpose-built fraud pipeline</div>
               </div>
               <div className="absolute top-1/2 -right-16 w-16 h-[2px] bg-error border-t border-dashed border-error -translate-y-1/2"></div>
               <div className="absolute top-1/2 -right-20 -translate-y-1/2"><span className="material-symbols-outlined text-error text-[24px]">block</span></div>
