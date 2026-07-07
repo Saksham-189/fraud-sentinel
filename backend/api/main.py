@@ -36,6 +36,21 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def get_allowed_origins() -> list[str]:
+    defaults = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "https://fraud-sentinel-seven.vercel.app",
+        "https://fraud-sentinel-production-34ee.up.railway.app",
+    ]
+    configured = []
+    for key in ("FRONTEND_URL", "CORS_ORIGINS"):
+        raw_value = os.environ.get(key, "")
+        configured.extend(origin.strip() for origin in raw_value.split(",") if origin.strip())
+    return sorted(set(defaults + configured))
+
 app = FastAPI(
     title="Fraud Sentinel API",
     description="Offline Fraud Detection System",
@@ -65,12 +80,7 @@ app.include_router(system.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "https://fraud-sentinel-seven.vercel.app"
-    ],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
