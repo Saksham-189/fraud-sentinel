@@ -11,4 +11,6 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY . .
 
-CMD ["sh", "-c", "gunicorn api.main:app -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:${PORT:-8000}"]
+EXPOSE 8000
+
+CMD ["gunicorn", "api.main:app", "-w", "2", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
