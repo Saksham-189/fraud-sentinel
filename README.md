@@ -276,6 +276,12 @@ pip install -r requirements.txt
 uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
+Install optional training/data-pipeline dependencies only when retraining models:
+
+```bash
+pip install -r requirements-training.txt
+```
+
 Health check:
 
 ```bash
@@ -357,6 +363,12 @@ Important outputs:
 | Synthetic data | `backend/data/synthetic/synthetic_data.json` |
 
 Data and trained model artifacts are intentionally excluded from Git when they are large or generated. Rebuild them locally or provide them through your deployment artifact strategy.
+
+Before running training commands, install the optional training requirements from the backend directory:
+
+```powershell
+backend/.venv312/Scripts/python.exe -m pip install -r backend/requirements-training.txt
+```
 
 ## Training Commands
 

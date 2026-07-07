@@ -1,0 +1,12 @@
+# Optional local training/data-pipeline dependencies.
+# Install this in addition to requirements.txt when retraining models.
+-r requirements.txt
+
+torch
+transformers
+accelerate>=1.1.0
+scikit-learn
+numpy
+pandas
+pyarrow
+pytest

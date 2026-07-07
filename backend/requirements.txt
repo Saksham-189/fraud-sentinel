@@ -1,16 +1,10 @@
-# Backend API & Models
+# Production runtime dependencies for the Railway/Render API service.
+# Training and dataset-build dependencies live in requirements-training.txt.
 fastapi
 uvicorn[standard]
 pydantic
 email-validator
 python-dotenv
-torch
-transformers
-accelerate>=1.1.0
-scikit-learn
-numpy
-pandas
-pyarrow
 requests
 gunicorn
 psycopg2-binary
@@ -19,6 +13,5 @@ python-jose
 PyJWT
 passlib[bcrypt]
 python-multipart
-pytest
 slowapi
 psutil
