@@ -78,6 +78,16 @@ def startup_event():
     
 app.include_router(system.router)
 
+
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "service": "FraudSentinel API",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_allowed_origins(),

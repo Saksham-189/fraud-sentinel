@@ -151,6 +151,9 @@ function svgFor(name) {
 }
 
 function hydrateIcons(root = document) {
+  if (root.nodeType === Node.TEXT_NODE) {
+    root = root.parentElement || document;
+  }
   root.querySelectorAll?.(".material-symbols-outlined").forEach((node) => {
     const textName = (node.textContent || "").trim();
     const name = (textName || node.dataset.iconName || "").trim();
@@ -167,6 +170,9 @@ export default function LocalIconProvider({ children }) {
     hydrateIcons();
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
+        if (mutation.type === "characterData") {
+          hydrateIcons(mutation.target);
+        }
         if (mutation.type === "childList") {
           hydrateIcons(mutation.target);
           mutation.addedNodes.forEach((node) => {
