@@ -3,6 +3,9 @@ import axios from "axios";
 // Dynamic API Base: accepts full URLs, local proxy paths, or bare Railway/Vercel domains.
 function normalizeApiBase(value) {
   const raw = String(value || "").trim();
+  if (!raw && typeof window !== "undefined" && window.location.hostname.endsWith(".up.railway.app")) {
+    return "https://fraud-sentinel-production.up.railway.app";
+  }
   if (!raw) return "/api";
   if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) return raw;
   return `https://${raw}`;

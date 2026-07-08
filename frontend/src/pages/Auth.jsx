@@ -80,6 +80,40 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, error, 
 
 // ─── Form Variants ──────────────────────────────────────────────────
 
+function EyeToggleIcon({ hidden }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {hidden ? (
+        <>
+          <path d="m3 3 18 18" />
+          <path d="M10.6 10.6A3 3 0 0 0 14 14" />
+          <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3 3.8" />
+          <path d="M6.5 6.8C3.7 8.6 2 12 2 12s3.5 7 10 7a10.6 10.6 0 0 0 5-1.2" />
+        </>
+      ) : (
+        <>
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+          <circle cx="12" cy="12" r="3" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+function PasswordVisibilityButton({ visible, onClick, disabled }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={visible ? "Hide password" : "Show password"}
+      className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+    >
+      <EyeToggleIcon hidden={visible} />
+    </button>
+  );
+}
+
 const formVariants = {
   enter: { opacity: 0, x: 20 },
   center: { opacity: 1, x: 0 },
@@ -131,7 +165,7 @@ function LoginForm({ onSwitch }) {
       )}
       <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
       <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" error={errors.password} icon="lock" disabled={loading}
-        rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+        rightElement={<PasswordVisibilityButton visible={showPw} onClick={() => setShowPw(!showPw)} disabled={loading} />}
       />
       <div className="flex justify-end">
         <Link to="/forgot-password" className="text-xs font-semibold text-accent-violet hover:opacity-80 transition-opacity">Forgot password?</Link>
@@ -156,6 +190,7 @@ function RegisterForm({ onSwitch }) {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
   const validate = () => {
     const e = {};
     if (!name.trim()) e.name = "Full name is required";
@@ -169,13 +204,13 @@ function RegisterForm({ onSwitch }) {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
     const v = validate();
-    if (Object.keys(v).length) { setErrors(v); return; }
-    setErrors({}); setLoading(true);
+    if (Object.keys(v).length) { setErrors(v); setApiError(""); return; }
+    setErrors({}); setApiError(""); setLoading(true);
     try {
       const reg = await register(name, email, password);
-      if (reg.error) { setErrors({ email: reg.error }); setLoading(false); return; }
+      if (reg.error) { setApiError(reg.error); setLoading(false); return; }
     } catch {
-      setErrors({ email: "Server not reachable. Please try again." });
+      setApiError("Server not reachable. Please try again.");
       setLoading(false);
       return;
     }
@@ -183,18 +218,23 @@ function RegisterForm({ onSwitch }) {
   };
   return (
     <motion.form key="register" variants={formVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} onSubmit={handleSubmit} className="space-y-4">
+      {apiError && (
+        <div className="glass-card !rounded-xl px-4 py-3 flex items-center gap-2.5 text-sm text-red-500 font-medium border-l-4 !border-l-red-500">
+          <span className="material-symbols-outlined text-[18px]">error</span>{apiError}
+        </div>
+      )}
       <AuthInput label="Full Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" error={errors.name} icon="person" disabled={loading} />
       <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={errors.email} icon="mail" disabled={loading} />
       <div>
         <AuthInput label="Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
-          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+          rightElement={<PasswordVisibilityButton visible={showPw} onClick={() => setShowPw(!showPw)} disabled={loading} />}
         />
         <PasswordStrength password={password} />
       </div>
       <AuthInput label="Confirm Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
+      <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Creating account...</> : <>Create Account<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
-      </HoverButton>
+      </button>
       <p className="text-center text-sm text-[var(--text-secondary)]">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Sign in</button></p>
     </motion.form>
   );
@@ -302,7 +342,7 @@ function ResetPasswordForm() {
       )}
       <div>
         <AuthInput label="New Password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" error={errors.password} icon="lock" disabled={loading}
-          rightElement={<button type="button" onClick={() => setShowPw(!showPw)} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"><span className="material-symbols-outlined text-[20px]">{showPw ? "visibility_off" : "visibility"}</span></button>}
+          rightElement={<PasswordVisibilityButton visible={showPw} onClick={() => setShowPw(!showPw)} disabled={loading} />}
         />
         <PasswordStrength password={password} />
       </div>

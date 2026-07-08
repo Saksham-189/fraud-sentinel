@@ -154,7 +154,12 @@ function hydrateIcons(root = document) {
   if (root.nodeType === Node.TEXT_NODE) {
     root = root.parentElement || document;
   }
-  root.querySelectorAll?.(".material-symbols-outlined").forEach((node) => {
+  const nodes = [];
+  if (root.matches?.(".material-symbols-outlined")) {
+    nodes.push(root);
+  }
+  root.querySelectorAll?.(".material-symbols-outlined").forEach((node) => nodes.push(node));
+  nodes.forEach((node) => {
     const textName = (node.textContent || "").trim();
     const name = (textName || node.dataset.iconName || "").trim();
     if (!name || node.dataset.localIconReady === name) return;
