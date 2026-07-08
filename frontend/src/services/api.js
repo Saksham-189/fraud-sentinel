@@ -1,7 +1,14 @@
 import axios from "axios";
 
-// Dynamic API Base: Uses Vercel environment variable in production, falls back to local Vite proxy.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+// Dynamic API Base: accepts full URLs, local proxy paths, or bare Railway/Vercel domains.
+function normalizeApiBase(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "/api";
+  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) return raw;
+  return `https://${raw}`;
+}
+
+const API_BASE = normalizeApiBase(import.meta.env.VITE_API_BASE_URL);
 
 // 🚀 STEP 14 — CREATE AXIOS CLIENT
 export const axiosClient = axios.create({

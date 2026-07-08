@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { HoverButton } from "../components/Motion"
-import { checkHealth, authApi } from "../services/api"
+import { authApi } from "../services/api"
 import { useAuth } from "../context/AuthContext"
 
 // ─── Password Strength ──────────────────────────────────────────────
@@ -110,12 +110,6 @@ function LoginForm({ onSwitch }) {
     if (Object.keys(v).length) { setErrors(v); return; }
     setErrors({}); setApiError(""); setLoading(true);
     try {
-      const isOnline = await checkHealth();
-      if (!isOnline) {
-        setApiError("Server not reachable. Please start the API and try again.");
-        setLoading(false);
-        return;
-      }
       const res = await login(email, password);
       if (res.error) {
         setApiError(res.error);
@@ -178,12 +172,6 @@ function RegisterForm({ onSwitch }) {
     if (Object.keys(v).length) { setErrors(v); return; }
     setErrors({}); setLoading(true);
     try {
-      const isOnline = await checkHealth();
-      if (!isOnline) {
-        setErrors({ email: "Server not reachable. Please start the API and try again." });
-        setLoading(false);
-        return;
-      }
       const reg = await register(name, email, password);
       if (reg.error) { setErrors({ email: reg.error }); setLoading(false); return; }
     } catch {

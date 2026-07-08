@@ -57,7 +57,22 @@ export function AuthProvider({ children }) {
     if (res.error) {
       return { error: res.error };
     }
-    return await login(email, password);
+
+    const accessToken = res.access_token || res.token;
+    if (!accessToken) {
+      return { error: "Registration succeeded, but no session token was returned." };
+    }
+
+    localStorage.setItem("token", accessToken);
+    const userData = { id: res.user_id, email, name };
+    localStorage.setItem("fs_user", JSON.stringify(userData));
+    localStorage.setItem("fs_authed", "true");
+
+    setToken(accessToken);
+    setUser(userData);
+    setIsAuthenticated(true);
+
+    return { success: true };
   };
 
   const logout = () => {

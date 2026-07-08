@@ -4,9 +4,7 @@ import { Sidebar, TopNavbar, ToastNotification } from "./Dashboard";
 import { HoverButton } from "../components/Motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { analysisApi } from "../services/api";
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
-} from "recharts";
+import { buildLegacyIntelligenceFallback, IntelligenceDetails } from "../components/Intelligence";
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -15,23 +13,6 @@ function riskBucketFromLevel(level) {
   if (u.includes("HIGH")) return "HIGH";
   if (u.includes("MEDIUM") || u.includes("MODERATE")) return "MEDIUM";
   return "SAFE";
-}
-
-function featuresToBarData(features) {
-  if (!features || typeof features !== "object") return [];
-  const keys = [
-    ["credential_intent", "Credential Intent", "from-fuchsia-500 to-pink-500", "#d946ef"],
-    ["urgency", "Urgency", "from-blue-500 to-indigo-500", "#3b82f6"],
-    ["fear", "Fear", "from-rose-500 to-red-500", "#f43f5e"],
-    ["authority", "Authority", "from-violet-500 to-indigo-500", "#6366f1"],
-    ["link_risk", "Link Risk", "from-emerald-500 to-cyan-500", "#10b981"],
-  ];
-  return keys.map(([k, name, gradient, fill]) => ({
-    name,
-    score: Math.round((Number(features[k]) || 0) * 100),
-    gradient,
-    fill,
-  }));
 }
 
 function mapHistoryItem(item) {
@@ -55,19 +36,21 @@ function mapHistoryItem(item) {
       highlighted: false,
     };
   });
-  const timeline = Array.isArray(ma)
-    ? ma.map((m, i) => ({ index: `Msg ${i + 1}`, risk: m.fraud_probability ?? 0 }))
-    : [{ index: "Msg 1", risk: prob }];
-  const lastFeats =
-    Array.isArray(ma) && ma.length > 0 ? ma[ma.length - 1]?.features : res.features;
-  const signals = featuresToBarData(lastFeats);
+  const intelligence = buildLegacyIntelligenceFallback(res, input);
   return {
     id: item.id, title, lastMessage: lastText, risk, prob: Number(prob) || 0,
     time: item.timestamp ? (() => { try { return new Date(item.timestamp).toLocaleString(); } catch { return "Recently"; } })() : "Recently",
     behavior: res.behavior_score ?? 0, levelLabel: levelStr,
-    explanation: res.explanation || res.llm_explanation || res.reasoning || "No explanation stored.",
-    messages, signals, timeline, keySignals: [],
+    explanation: intelligence.summary || res.explanation || res.llm_explanation || res.reasoning || "No explanation stored.",
+    messages, keySignals: [], intelligence, inputText: getTextForConversation(input, res),
   };
+}
+
+function getTextForConversation(input, result) {
+  if (input?.text) return String(input.text);
+  if (Array.isArray(input?.messages)) return input.messages.map((m) => m?.text || "").filter(Boolean).join("\n");
+  if (Array.isArray(result?.messages_analysis)) return result.messages_analysis.map((m) => m?.text || "").filter(Boolean).join("\n");
+  return "";
 }
 
 // ─── Risk Badge ─────────────────────────────────────────────────────
@@ -286,6 +269,8 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
   };
 
   const riskGradient = conversation.risk === "HIGH" ? "from-red-500 to-pink-500" : conversation.risk === "MEDIUM" ? "from-amber-500 to-orange-500" : "from-emerald-500 to-cyan-500";
+  const intelligence = conversation.intelligence;
+  const primaryAction = intelligence?.recommended_actions?.[0] || "Review the analysis details.";
 
   return (
     <div className="flex-grow flex flex-col h-full overflow-hidden relative">
@@ -318,8 +303,16 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
             </span>
           </div>
           <div>
-            <h3 className="font-headline font-bold text-[var(--text-primary)]">Analysis Summary</h3>
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="font-headline font-bold text-[var(--text-primary)]">{intelligence?.classification?.primary || "Analysis Summary"}</h3>
+              {intelligence && (
+                <span className="text-xs font-bold text-[var(--text-tertiary)]">
+                  Confidence {(Number(intelligence.confidence) * 100).toFixed(0)}%
+                </span>
+              )}
+            </div>
             <p className="text-sm text-[var(--text-secondary)] mt-1 leading-relaxed">{conversation.explanation}</p>
+            <p className="text-sm text-[var(--text-primary)] mt-2"><span className="font-bold">Recommended:</span> {primaryAction}</p>
           </div>
         </div>
       </div>
@@ -367,72 +360,14 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
 function InsightsPanel({ conversation }) {
   if (!conversation) return null;
   return (
-    <div className="w-80 md:w-96 glass-sidebar border-l border-[var(--border-default)] h-full flex flex-col shrink-0 overflow-y-auto scrollbar-hide">
+    <div className="w-80 md:w-[430px] glass-sidebar border-l border-[var(--border-default)] h-full flex flex-col shrink-0 overflow-y-auto scrollbar-hide">
       <div className="p-4 border-b border-[var(--border-default)] sticky top-0 glass z-10">
         <h2 className="font-headline font-bold text-[var(--text-primary)] text-lg flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet">insights</span> Detailed Insights
+          <span className="material-symbols-outlined text-accent-violet">insights</span> Analysis Explanation
         </h2>
       </div>
-      <div className="p-6 space-y-8">
-        {/* Behavior Signals */}
-        <section>
-          <h3 className="text-sm font-headline font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4">Behavior Breakdown</h3>
-          {conversation.signals.length > 0 ? (
-            <div className="space-y-3">
-              {conversation.signals.map((item) => (
-                <div key={item.name} className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-[var(--text-secondary)] w-[90px] shrink-0 truncate">{item.name}</span>
-                  <div className="flex-grow h-3 bg-[var(--surface-2)] rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.score}%` }}
-                      transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      className={`h-full bg-gradient-to-r ${item.gradient} rounded-full`}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-[var(--text-tertiary)] w-8 text-right">{item.score}%</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--text-tertiary)]">No feature data available.</p>
-          )}
-        </section>
-
-        {/* Risk Timeline */}
-        <section>
-          <h3 className="text-sm font-headline font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4">Risk Timeline</h3>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={conversation.timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-default)" />
-                <XAxis dataKey="index" axisLine={false} tickLine={false} tick={{ fill: "var(--text-tertiary)", fontSize: 10, dy: 5 }} />
-                <YAxis domain={[0, 1]} tickFormatter={(val) => `${val * 100}%`} axisLine={false} tickLine={false} tick={{ fill: "var(--text-tertiary)", fontSize: 10 }} />
-                <Line type="stepAfter" dataKey="risk" stroke={conversation.risk === "HIGH" ? "#ef4444" : conversation.risk === "MEDIUM" ? "#f59e0b" : "#10b981"} strokeWidth={3} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        {/* Key Signals */}
-        {conversation.keySignals && conversation.keySignals.length > 0 && (
-          <section>
-            <h3 className="text-sm font-headline font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4">Detected Signals</h3>
-            <div className="space-y-3">
-              {conversation.keySignals.map((signal, idx) => (
-                <div key={idx} className="flex gap-3 p-3 rounded-xl glass-card !p-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${signal.color}`}>
-                    <span className="material-symbols-outlined text-[16px]">{signal.icon}</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-xs text-[var(--text-primary)]">{signal.title}</h4>
-                    <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{signal.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+      <div className="p-5">
+        <IntelligenceDetails intelligence={conversation.intelligence} text={conversation.inputText} compact />
       </div>
     </div>
   );

@@ -152,7 +152,8 @@ function svgFor(name) {
 
 function hydrateIcons(root = document) {
   root.querySelectorAll?.(".material-symbols-outlined").forEach((node) => {
-    const name = (node.dataset.iconName || node.textContent || "").trim();
+    const textName = (node.textContent || "").trim();
+    const name = (textName || node.dataset.iconName || "").trim();
     if (!name || node.dataset.localIconReady === name) return;
     node.dataset.iconName = name;
     node.dataset.localIconReady = name;
@@ -174,7 +175,7 @@ export default function LocalIconProvider({ children }) {
         }
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, characterData: true, subtree: true });
     return () => observer.disconnect();
   }, []);
 

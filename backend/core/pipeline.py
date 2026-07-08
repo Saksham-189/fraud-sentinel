@@ -16,6 +16,7 @@ from config.config import (
 )
 from data_pipeline.data_cleaner import clean_text
 from core.feature_extractor import extract_features, behavior_score
+from core.intelligence_builder import build_intelligence
 from models.predict import get_lr_prediction
 from models.transformer_model import predict_transformer
 from core.llm_engine import generate_llm_explanation
@@ -296,7 +297,7 @@ def run_analysis_pipeline(conversation: dict) -> dict:
             })
         except:
             llm_explanation = final_msg["explanation"]
-        return {
+        analysis_result = {
             "conversation_id": conversation.get("conversation_id", "unknown"),
             "final_score": final_score,
             "final_risk_level": level,
@@ -305,11 +306,13 @@ def run_analysis_pipeline(conversation: dict) -> dict:
             "behavior_score": final_msg["behavior_score"],
             "messages_analysis": results,
             "explanation": llm_explanation,
-            "llm_explanation": llm_explanation
+            "llm_explanation": llm_explanation,
         }
+        analysis_result["intelligence"] = build_intelligence(analysis_result, conversation)
+        return analysis_result
     except Exception as e:
         logging.error(f"[pipeline] Full analysis failed: {e}")
-        return {
+        analysis_result = {
             "conversation_id": conversation.get("conversation_id", "unknown"),
             "final_score": 0.5,
             "final_risk_level": "UNKNOWN",
@@ -320,3 +323,5 @@ def run_analysis_pipeline(conversation: dict) -> dict:
             "explanation": "Analysis unavailable due to an internal error.",
             "llm_explanation": "Analysis unavailable."
         }
+        analysis_result["intelligence"] = build_intelligence(analysis_result, conversation)
+        return analysis_result
