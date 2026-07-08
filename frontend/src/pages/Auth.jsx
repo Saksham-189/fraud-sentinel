@@ -217,7 +217,7 @@ function RegisterForm({ onSwitch }) {
     navigate("/dashboard");
   };
   return (
-    <motion.form key="register" variants={formVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} onSubmit={handleSubmit} className="space-y-4">
+    <motion.form key="register" variants={formVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} onSubmit={handleSubmit} className="space-y-4 relative z-20 pointer-events-auto">
       {apiError && (
         <div className="glass-card !rounded-xl px-4 py-3 flex items-center gap-2.5 text-sm text-red-500 font-medium border-l-4 !border-l-red-500">
           <span className="material-symbols-outlined text-[18px]">error</span>{apiError}
@@ -232,7 +232,7 @@ function RegisterForm({ onSwitch }) {
         <PasswordStrength password={password} />
       </div>
       <AuthInput label="Confirm Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
+      <button type="button" onClick={handleSubmit} disabled={loading} className="relative z-20 pointer-events-auto w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Creating account...</> : <>Create Account<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
       </button>
       <p className="text-center text-sm text-[var(--text-secondary)]">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Sign in</button></p>
