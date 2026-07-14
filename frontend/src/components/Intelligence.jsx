@@ -1,4 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState } from "react";
+import { BentoActionStrip, BentoGrid, BentoMetric, SpatialTile } from "./Bento";
+import { EvidenceTape, GraffitiTag, ScoutMascot, StreetSticker } from "./StreetArt";
 
 const SIGNALS = {
   credential_request: {
@@ -45,7 +48,7 @@ const TONE = {
     text: "text-red-500",
     soft: "bg-red-500/5 border-red-500/20",
     ring: "ring-red-500/20",
-    gradient: "from-red-500 to-pink-500",
+    gradient: "from-red-500 to-red-600",
   },
   MEDIUM: {
     icon: "info",
@@ -53,7 +56,7 @@ const TONE = {
     text: "text-amber-500",
     soft: "bg-amber-500/5 border-amber-500/20",
     ring: "ring-amber-500/20",
-    gradient: "from-amber-500 to-cyan-500",
+    gradient: "from-amber-500 to-amber-600",
   },
   SAFE: {
     icon: "check_circle",
@@ -61,7 +64,7 @@ const TONE = {
     text: "text-emerald-500",
     soft: "bg-emerald-500/5 border-emerald-500/20",
     ring: "ring-emerald-500/20",
-    gradient: "from-emerald-500 to-cyan-500",
+    gradient: "from-emerald-600 to-emerald-700",
   },
   UNKNOWN: {
     icon: "help",
@@ -343,8 +346,8 @@ export function riskTone(level) {
 function SectionHeader({ icon, title, subtitle }) {
   return (
     <div className="mb-4">
-      <h3 className="font-headline font-bold text-[var(--text-primary)] flex items-center gap-2">
-        <span className="material-symbols-outlined text-accent-violet text-[20px]">{icon}</span>
+      <h3 className="font-headline font-black text-[var(--text-primary)] flex items-center gap-2">
+        <span className="material-symbols-outlined text-accent-cyan text-[20px]">{icon}</span>
         {title}
       </h3>
       {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>}
@@ -369,21 +372,21 @@ function InfoList({ items = [], icon = "check_circle", toneClass = "text-emerald
 export function DecisionHeader({ intelligence }) {
   const tone = riskTone(intelligence?.risk_level);
   return (
-    <section className={`glass-card p-6 border ${tone.soft}`}>
+    <section className={`case-sheet p-6 border ${tone.soft} scan-line overflow-hidden`}>
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
         <div className="flex items-start gap-4 min-w-0">
-          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tone.gradient} text-white flex items-center justify-center shrink-0 shadow-lg ring-8 ${tone.ring}`}>
+          <div className={`w-12 h-12 rounded-md bg-[var(--surface-2)] border border-[var(--border-default)] ${tone.text} flex items-center justify-center shrink-0`}>
             <span className="material-symbols-outlined">{tone.icon}</span>
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-black uppercase tracking-wide ${tone.badge}`}>
+              <span className={`verdict-stamp ${tone.text}`}>
                 {intelligence.decision?.severity_label || `${intelligence.risk_level} Risk`}
               </span>
-              <span className="px-3 py-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] text-xs font-black text-[var(--text-primary)]">
+              <span className="case-stamp text-[var(--text-primary)]">
                 {percent(intelligence.risk_score)}/100 risk
               </span>
-              <span className="px-3 py-1.5 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] text-xs font-black text-[var(--text-primary)]">
+              <span className="case-stamp text-[var(--text-primary)]">
                 {percent(intelligence.confidence)}% confidence
               </span>
             </div>
@@ -392,7 +395,8 @@ export function DecisionHeader({ intelligence }) {
             <p className="mt-3 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">{intelligence.decision?.primary_reason || intelligence.summary}</p>
           </div>
         </div>
-        <div className="lg:w-56 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
+        <div className="lg:w-60 rounded-md border border-[var(--border-default)] bg-[var(--surface-2)] p-4 relative z-10">
+          <EvidenceTape className="mb-3">CASE TYPE</EvidenceTape>
           <p className="text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">Classification</p>
           <p className="mt-2 font-black text-[var(--text-primary)]">{intelligence.classification?.primary}</p>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">{intelligence.classification?.secondary}</p>
@@ -409,7 +413,7 @@ export function ThreatAssessmentCard({ intelligence, compact = false }) {
 
 export function FinalVerdict({ intelligence }) {
   return (
-    <section className="glass-card p-5">
+    <section className="street-sticker p-5">
       <SectionHeader icon="gavel" title="Final Verdict" subtitle="Plain-English conclusion from the evidence." />
       <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
         <p className="font-black text-[var(--text-primary)]">{intelligence.decision?.title || intelligence.verdict}</p>
@@ -423,7 +427,10 @@ export function EvidenceList({ intelligence }) {
   const evidence = intelligence?.evidence || [];
   return (
     <section className="glass-card p-5">
-      <SectionHeader icon="fact_check" title="Evidence Found" subtitle="Every finding is tied to the message or model features." />
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <SectionHeader icon="fact_check" title="Evidence Found" subtitle="Every finding is tied to the message or model features." />
+        <GraffitiTag tone={evidence.length ? "coral" : "safe"}>{evidence.length ? "SCAM SPOTTED" : "CLEAR"}</GraffitiTag>
+      </div>
       {evidence.length === 0 ? (
         <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-[var(--text-secondary)]">
           No high-confidence fraud evidence was detected.
@@ -431,7 +438,7 @@ export function EvidenceList({ intelligence }) {
       ) : (
         <div className="space-y-3">
           {evidence.map((item) => (
-            <div key={`${item.type}-${item.evidence_text || item.label}`} className={`rounded-xl border p-4 ${item.severity === "strong" ? "border-red-500/20 bg-red-500/5" : "border-amber-500/20 bg-amber-500/5"}`}>
+            <StreetSticker key={`${item.type}-${item.evidence_text || item.label}`} className={`!p-4 ${item.severity === "strong" ? "!border-red-500/25" : "!border-amber-500/25"}`}>
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div>
                   <h4 className="font-bold text-[var(--text-primary)]">{item.label}</h4>
@@ -446,7 +453,7 @@ export function EvidenceList({ intelligence }) {
                   <p className="text-xs font-bold uppercase tracking-wide text-[var(--text-tertiary)]">{item.severity}</p>
                 </div>
               </div>
-            </div>
+            </StreetSticker>
           ))}
         </div>
       )}
@@ -476,7 +483,7 @@ export function AnnotatedMessage({ text, intelligence }) {
   });
   if (cursor < source.length) chunks.push({ text: source.slice(cursor) });
   return (
-    <section className="glass-card p-5">
+    <section className="case-sheet p-5">
       <SectionHeader icon="find_in_page" title="Annotated Message" subtitle="Click highlighted phrases to inspect their role in the decision." />
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
         <div className="rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
@@ -486,7 +493,7 @@ export function AnnotatedMessage({ text, intelligence }) {
                 key={index}
                 type="button"
                 onClick={() => setSelected(chunk.evidence)}
-                className="inline mx-0.5 rounded-lg bg-accent-violet/10 px-2 py-0.5 font-bold text-accent-violet ring-1 ring-accent-violet/20 transition-all hover:bg-accent-violet/20 focus:outline-none focus:ring-2 focus:ring-accent-violet/40"
+                className="annotation-mark inline mx-0.5 px-2 py-0.5 font-bold transition-all hover:bg-accent-cyan/20 focus:outline-none focus:ring-2 focus:ring-accent-cyan/40"
               >
                 {chunk.text}
               </button>
@@ -532,8 +539,8 @@ export function AttackPlaybook({ intelligence }) {
       ) : (
         <div className="space-y-3">
           {steps.map((step) => (
-            <div key={`${step.step}-${step.label}`} className="grid grid-cols-[36px_1fr] gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
-              <div className="w-9 h-9 rounded-xl bg-accent-violet/10 text-accent-violet flex items-center justify-center font-black">{step.step}</div>
+            <div key={`${step.step}-${step.label}`} className="grid grid-cols-[42px_1fr] gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4">
+              <div className="w-9 h-9 rounded-md bg-[var(--surface-1)] border border-[var(--border-default)] text-accent-cyan flex items-center justify-center font-black">{step.step}</div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h4 className="font-bold text-[var(--text-primary)]">{step.label}</h4>
@@ -594,7 +601,7 @@ export function ConfidenceExplanation({ intelligence }) {
     <section className="glass-card p-5">
       <SectionHeader icon="verified" title="Confidence Analysis" />
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="w-24 h-24 rounded-full border-8 border-accent-violet/20 flex items-center justify-center text-2xl font-black text-accent-violet shrink-0">
+        <div className="w-24 h-24 rounded-[18px_12px_20px_12px] border-8 border-accent-cyan/20 flex items-center justify-center text-2xl font-black text-accent-cyan shrink-0 rotate-[-2deg]">
           {percent(intelligence.confidence)}%
         </div>
         <div>
@@ -666,7 +673,7 @@ export function ShareableSummary({ intelligence }) {
         <button
           type="button"
           onClick={copySummary}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)] px-3 py-2 text-sm font-bold text-[var(--text-primary)] hover:border-accent-violet/30 transition-all"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[var(--border-default)] bg-[var(--surface-2)] px-3 py-2 text-sm font-bold text-[var(--text-primary)] hover:border-accent-cyan/40 transition-all"
         >
           <span className="material-symbols-outlined text-[18px]">{copied ? "check" : "content_copy"}</span>
           {copied ? "Copied" : "Copy"}
@@ -681,20 +688,105 @@ export function ShareableSummary({ intelligence }) {
 
 export function IntelligenceDetails({ intelligence, text = "", compact = false }) {
   const normalized = enrichIntelligence(intelligence);
+  const tone = riskTone(normalized.risk_level);
+  const primaryAction = normalized.recommended_actions?.[0] || "Review the evidence before acting.";
+  const hasDontDo = (normalized.dont_do || []).length > 0;
   return (
-    <div className={compact ? "space-y-4" : "space-y-6"}>
-      <DecisionHeader intelligence={normalized} />
-      <FinalVerdict intelligence={normalized} />
-      <EvidenceList intelligence={normalized} />
-      <AnnotatedMessage text={text} intelligence={normalized} />
-      <AttackPlaybook intelligence={normalized} />
-      <WhyItMatters intelligence={normalized} />
-      <SafeAlternative intelligence={normalized} />
-      <RiskProgressionTimeline intelligence={normalized} />
-      <ConfidenceExplanation intelligence={normalized} />
-      <RecommendedActions intelligence={normalized} />
-      <DontDoPanel intelligence={normalized} />
-      <ShareableSummary intelligence={normalized} />
+    <div className={compact ? "" : "space-y-5"}>
+      <BentoGrid dense={!compact} className={compact ? "bento-grid-compact" : ""}>
+        {!compact && (
+          <SpatialTile span="full" className="p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <GraffitiTag tone="yellow">FOLLOW THE EVIDENCE</GraffitiTag>
+          <div className="flex items-center gap-3">
+            <ScoutMascot mood={normalized.risk_level === "HIGH" ? "danger" : normalized.risk_level === "SAFE" ? "safe" : "ready"} className="hidden sm:block w-16 h-16" />
+            <EvidenceTape>{normalized.risk_level === "HIGH" ? "VERIFY FIRST" : "CASE NOTES"}</EvidenceTape>
+          </div>
+            </div>
+          </SpatialTile>
+        )}
+
+        <SpatialTile span="hero" spotlight className={`p-6 ${tone.soft}`}>
+          <DecisionHeader intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="compact" className="p-4">
+          <BentoMetric
+            icon="verified"
+            label="Confidence"
+            value={`${percent(normalized.confidence)}%`}
+            note={normalized.reasoning_quality}
+            tone={normalized.risk_level === "HIGH" ? "danger" : normalized.risk_level === "SAFE" ? "safe" : "warn"}
+          />
+        </SpatialTile>
+
+        <SpatialTile span="compact" className="p-4">
+          <BentoMetric
+            icon="category"
+            label="Classification"
+            value={normalized.classification?.primary || "Analysis"}
+            note={normalized.classification?.industry}
+            tone="cyan"
+          />
+        </SpatialTile>
+
+        <SpatialTile span="wide" className="p-5">
+          <BentoActionStrip className="h-full items-start">
+            <span className={`material-symbols-outlined mt-0.5 ${tone.text}`}>{tone.icon}</span>
+            <div>
+              <p className="case-label">Primary next action</p>
+              <p className="mt-1 text-base font-black text-[var(--text-primary)]">{primaryAction}</p>
+              <p className="mt-2 text-sm text-[var(--text-secondary)]">{normalized.decision?.subtitle || normalized.summary}</p>
+            </div>
+          </BentoActionStrip>
+        </SpatialTile>
+
+        <SpatialTile span="wide" className="p-5">
+          <FinalVerdict intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="tall" className="p-5">
+          <EvidenceList intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="hero" spotlight className="p-5">
+          <AnnotatedMessage text={text} intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="wide" className="p-5">
+          <AttackPlaybook intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="feature" className="p-5">
+          <WhyItMatters intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="feature" className="p-5">
+          <SafeAlternative intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="wide" className="p-5">
+          <RiskProgressionTimeline intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="feature" className="p-5">
+          <ConfidenceExplanation intelligence={normalized} />
+        </SpatialTile>
+
+        <SpatialTile span="feature" className="p-5">
+          <RecommendedActions intelligence={normalized} />
+        </SpatialTile>
+
+        {hasDontDo && (
+          <SpatialTile span="feature" className="p-5">
+            <DontDoPanel intelligence={normalized} />
+          </SpatialTile>
+        )}
+
+        <SpatialTile span="wide" className="p-5">
+          <ShareableSummary intelligence={normalized} />
+        </SpatialTile>
+      </BentoGrid>
     </div>
   );
 }

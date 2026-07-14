@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Sidebar, TopNavbar, ToastNotification } from "./Dashboard";
-import { Reveal, StaggerContainer, StaggerItem } from "../components/Motion";
+import { Reveal } from "../components/Motion";
+import { BentoGrid, SpatialTile } from "../components/Bento";
 import { useTheme } from "../context/ThemeContext";
+import { EvidenceTape, GraffitiTag, ScoutMascot } from "../components/StreetArt";
 
 function readPrefs() {
   try { return JSON.parse(localStorage.getItem("fs_user_preferences") || "{}"); } catch { return {}; }
@@ -11,7 +13,7 @@ function SettingRow({ icon, title, description, children }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border-default)]">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-accent-violet/10 text-accent-violet flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-md bg-[var(--surface-1)] border border-[var(--border-default)] text-accent-cyan flex items-center justify-center shrink-0">
           <span className="material-symbols-outlined text-[20px]">{icon}</span>
         </div>
         <div>
@@ -31,7 +33,7 @@ function Toggle({ checked, onChange, label }) {
       onClick={onChange}
       aria-label={label}
       aria-pressed={checked}
-      className={`w-12 h-7 rounded-full p-1 transition-all ${checked ? "bg-gradient-to-r from-violet-600 to-pink-500 shadow-glow-violet" : "bg-[var(--surface-3)]"}`}
+      className={`w-12 h-7 rounded-full p-1 transition-all ${checked ? "bg-accent-cyan" : "bg-[var(--surface-3)]"}`}
     >
       <span className={`block w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
@@ -44,18 +46,18 @@ function ThemePreview({ theme, active, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`text-left rounded-2xl border-2 p-4 transition-all ${active ? "border-accent-violet shadow-glow-violet" : "border-[var(--border-default)] hover:border-[var(--border-strong)]"}`}
+      className={`text-left rounded-md border-2 p-4 transition-all ${active ? "border-accent-cyan" : "border-[var(--border-default)] hover:border-[var(--border-strong)]"}`}
     >
       <div className={`h-28 rounded-xl border overflow-hidden ${dark ? "bg-[#09090b] border-[#27272a]" : "bg-[#fafafa] border-[#e4e4e7]"}`}>
         <div className={`h-7 border-b ${dark ? "bg-[#111114] border-[#27272a]" : "bg-white border-[#e4e4e7]"}`} />
         <div className="p-3 space-y-2">
           <div className={`h-3 w-2/3 rounded ${dark ? "bg-[#fafafa]" : "bg-[#09090b]"}`} />
           <div className={`h-3 w-full rounded ${dark ? "bg-[#27272a]" : "bg-[#e4e4e7]"}`} />
-          <div className="h-3 w-1/2 rounded bg-gradient-to-r from-violet-500 to-pink-500" />
+          <div className="h-3 w-1/2 rounded bg-accent-cyan" />
         </div>
       </div>
-      <p className="font-headline font-bold text-[var(--text-primary)] mt-3 capitalize">{theme}</p>
-      <p className="text-xs text-[var(--text-secondary)] mt-1">{dark ? "Default, cinematic app mode." : "Bright, calm everyday mode."}</p>
+      <p className="font-headline font-bold text-[var(--text-primary)] mt-3">{dark ? "Street Case Dark" : "Case Paper Light"}</p>
+      <p className="text-xs text-[var(--text-secondary)] mt-1">{dark ? "Default obsidian case desk with controlled street-art accents." : "Warm paper mode for daytime review."}</p>
     </button>
   );
 }
@@ -87,28 +89,33 @@ export default function Settings() {
         <main className="flex-grow p-4 md:p-8 max-w-[980px] mx-auto w-full pb-20">
           <Reveal>
             <div className="mb-8">
-              <p className="text-sm font-bold tracking-[0.18em] uppercase text-accent-violet">Preferences</p>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold text-[var(--text-primary)] mt-2">Your FraudSentinel setup</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <GraffitiTag tone="yellow">Investigator Locker</GraffitiTag>
+                  <h1 className="text-3xl md:text-4xl font-headline font-black text-[var(--text-primary)] mt-3">Your case-file setup</h1>
+                </div>
+                <ScoutMascot mood="ready" className="hidden sm:block w-20 h-20" />
+              </div>
               <p className="text-[var(--text-secondary)] mt-2 max-w-2xl">
                 These settings affect how the app looks and behaves for you. Detection model tuning remains managed by the backend.
               </p>
             </div>
           </Reveal>
 
-          <StaggerContainer className="space-y-6">
-            <StaggerItem>
-              <section className="glass-card p-5 md:p-6">
-                <h2 className="text-lg font-headline font-bold text-[var(--text-primary)]">Theme</h2>
+          <BentoGrid dense={false}>
+            <SpatialTile span="wide" className="p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <h2 className="text-lg font-headline font-black text-[var(--text-primary)]">Theme</h2>
+                  <EvidenceTape>STYLE SWITCH</EvidenceTape>
+                </div>
                 <p className="text-sm text-[var(--text-secondary)] mt-1 mb-5">Dark mode is the default. Switch to light mode when you want a brighter interface.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <ThemePreview theme="dark" active={theme === "dark"} onClick={() => chooseTheme("dark")} />
                   <ThemePreview theme="light" active={theme === "light"} onClick={() => chooseTheme("light")} />
                 </div>
-              </section>
-            </StaggerItem>
+            </SpatialTile>
 
-            <StaggerItem>
-              <section className="glass-card p-5 md:p-6">
+            <SpatialTile span="wide" className="p-5 md:p-6">
                 <h2 className="text-lg font-headline font-bold text-[var(--text-primary)]">Interface behavior</h2>
                 <p className="text-sm text-[var(--text-secondary)] mt-1 mb-5">Small preferences that make the assistant feel better in daily use.</p>
                 <div className="space-y-3">
@@ -122,9 +129,8 @@ export default function Settings() {
                     <Toggle checked={prefs.saveHistory} onChange={() => togglePref("saveHistory")} label="Toggle save history" />
                   </SettingRow>
                 </div>
-              </section>
-            </StaggerItem>
-          </StaggerContainer>
+            </SpatialTile>
+          </BentoGrid>
         </main>
       </div>
       <ToastNotification show={toast.show} message={toast.title} subtext={toast.subtext} onClose={() => setToast((prev) => ({ ...prev, show: false }))} />

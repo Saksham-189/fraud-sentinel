@@ -157,7 +157,7 @@ export function AnimatedCounter({ value, duration = 1.2, className = "" }) {
   return <span ref={ref} className={className}>{count}</span>
 }
 
-export function PulseRing({ color = "var(--accent-violet)", size = 40, className = "" }) {
+export function PulseRing({ color = "var(--accent-cyan)", size = 40, className = "" }) {
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size }}>
       <motion.div

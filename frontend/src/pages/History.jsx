@@ -5,6 +5,7 @@ import { HoverButton } from "../components/Motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { analysisApi } from "../services/api";
 import { buildLegacyIntelligenceFallback, IntelligenceDetails } from "../components/Intelligence";
+import { EvidenceTape, GraffitiTag, ScoutMascot } from "../components/StreetArt";
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -57,13 +58,13 @@ function getTextForConversation(input, result) {
 
 function RiskBadge({ level }) {
   const styles = {
-    HIGH: "from-red-500/10 to-pink-500/10 text-red-500 border-red-500/20",
-    MEDIUM: "from-amber-500/10 to-orange-500/10 text-amber-500 border-amber-500/20",
-    SAFE: "from-emerald-500/10 to-cyan-500/10 text-emerald-500 border-emerald-500/20",
+    HIGH: "text-[var(--risk-high)]",
+    MEDIUM: "text-[var(--risk-medium)]",
+    SAFE: "text-[var(--risk-safe)]",
   };
   const icon = { HIGH: "warning", MEDIUM: "info", SAFE: "check_circle" };
   return (
-    <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border bg-gradient-to-r ${styles[level]} uppercase tracking-wider`}>
+    <div className={`verdict-stamp ${styles[level]}`}>
       <span className="material-symbols-outlined text-[12px]">{icon[level]}</span>
       {level}
     </div>
@@ -95,14 +96,18 @@ function HistoryListSkeleton() {
 function EmptyState({ icon, title, desc, ctaTo }) {
   return (
     <div className="p-8 text-center flex flex-col items-center justify-center h-full">
-      <div className="w-16 h-16 bg-[var(--surface-2)] rounded-2xl flex items-center justify-center mb-4 text-[var(--text-tertiary)]">
-        <span className="material-symbols-outlined text-[32px]">{icon}</span>
-      </div>
+      {icon === "history" || icon === "forum" ? (
+        <ScoutMascot mood="ready" className="w-20 h-20 mb-3" />
+      ) : (
+        <div className="w-16 h-16 bg-[var(--surface-2)] rounded-2xl flex items-center justify-center mb-4 text-[var(--text-tertiary)]">
+          <span className="material-symbols-outlined text-[32px]">{icon}</span>
+        </div>
+      )}
       <h3 className="font-headline font-bold text-[var(--text-primary)] mb-1">{title}</h3>
       <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-xs">{desc}</p>
       {ctaTo && (
         <Link to={ctaTo}>
-          <HoverButton className="bg-gradient-to-r from-violet-600 to-pink-500 text-white px-5 py-2 rounded-xl font-semibold text-sm shadow-glow-violet">
+          <HoverButton className="bg-[var(--text-primary)] text-[var(--surface-0)] px-5 py-2 rounded-md font-semibold text-sm">
             Analyze your first message
           </HoverButton>
         </Link>
@@ -118,16 +123,13 @@ function HistoryList({ conversations, activeId, setActiveId, filter, setFilter, 
   if (searchQuery) {
     filtered = filtered.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()) || c.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()));
   }
-  const filterColors = {
-    ALL: "from-violet-600 to-pink-500",
-    HIGH: "from-red-500 to-pink-500",
-    MEDIUM: "from-amber-500 to-orange-500",
-    SAFE: "from-emerald-500 to-cyan-500",
-  };
   return (
     <div className="w-80 md:w-96 glass-sidebar border-r border-[var(--border-default)] h-full flex flex-col shrink-0">
       <div className="p-4 border-b border-[var(--border-default)]">
-        <h2 className="font-headline font-bold text-[var(--text-primary)] text-lg mb-4">Conversations</h2>
+        <div className="mb-4">
+          <GraffitiTag tone="yellow">Case Archive</GraffitiTag>
+          <h2 className="font-headline font-black text-[var(--text-primary)] text-lg mt-3">Past investigations</h2>
+        </div>
         <div className="relative mb-3">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-[18px]">search</span>
           <input
@@ -135,7 +137,7 @@ function HistoryList({ conversations, activeId, setActiveId, filter, setFilter, 
             placeholder="Search history..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-xl text-sm focus:ring-2 focus:ring-accent-violet/20 focus:border-accent-violet outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+            className="w-full pl-9 pr-3 py-2 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md text-sm focus:ring-2 focus:ring-accent-cyan/20 focus:border-accent-cyan outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
           />
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -144,7 +146,7 @@ function HistoryList({ conversations, activeId, setActiveId, filter, setFilter, 
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                filter === f ? `bg-gradient-to-r ${filterColors[f]} text-white shadow-sm` : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:bg-[var(--surface-3)]"
+                filter === f ? "bg-[var(--text-primary)] text-[var(--surface-0)]" : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:bg-[var(--surface-3)]"
               }`}
             >
               {f}
@@ -170,9 +172,9 @@ function HistoryList({ conversations, activeId, setActiveId, filter, setFilter, 
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   onClick={() => setActiveId(c.id)}
-                  className={`relative p-4 border-b border-[var(--border-default)] cursor-pointer transition-all group ${
+                  className={`relative m-2 p-4 cursor-pointer transition-all group case-folder spatial-tile ${
                     activeId === c.id
-                      ? "bg-accent-violet/5 border-l-[3px] border-l-accent-violet"
+                      ? "bg-accent-cyan/10 border-l-[3px] border-l-accent-cyan"
                       : "hover:bg-[var(--surface-2)] border-l-[3px] border-l-transparent"
                   }`}
                 >
@@ -180,7 +182,7 @@ function HistoryList({ conversations, activeId, setActiveId, filter, setFilter, 
                     <h4 className="font-bold text-sm text-[var(--text-primary)] truncate pr-2">{c.title}</h4>
                     <span className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap group-hover:hidden block">{c.time}</span>
                     <div className="hidden group-hover:flex items-center gap-1 absolute right-2 top-2 glass-card !p-0.5 !rounded-lg">
-                      <Link to={`/visualization?id=${c.id}`} onClick={(e) => e.stopPropagation()} className="w-6 h-6 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-accent-violet hover:bg-accent-violet/10 transition-colors" title="View report">
+                      <Link to={`/visualization?id=${c.id}`} onClick={(e) => e.stopPropagation()} className="w-6 h-6 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-accent-cyan hover:bg-accent-cyan/10 transition-colors" title="View report">
                         <span className="material-symbols-outlined text-[14px]">article</span>
                       </Link>
                       <button onClick={(e) => { e.stopPropagation(); onDelete(c.id); }} className="w-6 h-6 rounded flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-500/10 transition-colors" title="Delete">
@@ -211,7 +213,7 @@ function ChatMessage({ msg }) {
   const content = msg.highlighted ? (
     <span>
       {msg.text.split("OTP").map((part, i, arr) =>
-        i < arr.length - 1 ? <span key={i}>{part}<span className="bg-pink-500/20 text-pink-500 px-1 rounded font-medium">OTP</span></span> : part
+        i < arr.length - 1 ? <span key={i}>{part}<span className="annotation-mark px-1 font-medium">OTP</span></span> : part
       )}
     </span>
   ) : msg.text;
@@ -226,8 +228,8 @@ function ChatMessage({ msg }) {
       <div className={`max-w-[75%] flex flex-col ${isUser ? "items-end" : "items-start"}`}>
         <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
           isUser
-            ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-tr-sm shadow-glow-violet"
-            : "glass-card !rounded-tl-sm"
+            ? "case-sheet text-[var(--text-primary)] rounded-tr-sm"
+            : "case-panel !rounded-tl-sm"
         }`}>
           {content}
         </div>
@@ -268,7 +270,6 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
     setInputText("");
   };
 
-  const riskGradient = conversation.risk === "HIGH" ? "from-red-500 to-pink-500" : conversation.risk === "MEDIUM" ? "from-amber-500 to-orange-500" : "from-emerald-500 to-cyan-500";
   const intelligence = conversation.intelligence;
   const primaryAction = intelligence?.recommended_actions?.[0] || "Review the analysis details.";
 
@@ -281,15 +282,15 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
           <RiskBadge level={conversation.risk} />
         </div>
         <div className="flex items-center gap-2">
-          <Link to={`/visualization?id=${conversation.id}`} className="p-2 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:bg-accent-violet/10 hover:text-accent-violet transition-colors" title="View intelligence report">
+          <Link to={`/visualization?id=${conversation.id}`} className="p-2 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:bg-accent-cyan/10 hover:text-accent-cyan transition-colors" title="View intelligence report">
             <span className="material-symbols-outlined text-[20px]">article</span>
           </Link>
           <button onClick={() => onDelete(conversation.id)} className="p-2 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:bg-red-500/10 hover:text-red-500 transition-colors" title="Delete">
             <span className="material-symbols-outlined text-[20px]">delete</span>
           </button>
           <div className="w-px h-6 bg-[var(--border-default)] mx-1" />
-          <HoverButton onClick={toggleInsights} className={`p-2 rounded-lg flex items-center justify-center transition-colors ${showInsights ? "bg-accent-violet/10 text-accent-violet" : "text-[var(--text-tertiary)] hover:bg-[var(--surface-2)]"}`} title="Toggle Insights">
-            <span className="material-symbols-outlined text-[20px]">analytics</span>
+          <HoverButton onClick={toggleInsights} className={`p-2 rounded-lg flex items-center justify-center transition-colors ${showInsights ? "bg-accent-cyan/10 text-accent-cyan" : "text-[var(--text-tertiary)] hover:bg-[var(--surface-2)]"}`} title="Toggle Insights">
+            <span className="material-symbols-outlined text-[20px]">fact_check</span>
           </HoverButton>
         </div>
       </div>
@@ -297,7 +298,7 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
       {/* Analysis Summary */}
       <div className="p-6 shrink-0 glass border-b border-[var(--border-default)] z-10">
         <div className="flex items-start gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br ${riskGradient} text-white shadow-lg`}>
+          <div className="w-12 h-12 rounded-md flex items-center justify-center shrink-0 bg-[var(--surface-2)] text-accent-cyan border border-[var(--border-default)]">
             <span className="material-symbols-outlined text-[24px]">
               {conversation.risk === "HIGH" ? "warning" : conversation.risk === "MEDIUM" ? "info" : "verified"}
             </span>
@@ -313,6 +314,7 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
             </div>
             <p className="text-sm text-[var(--text-secondary)] mt-1 leading-relaxed">{conversation.explanation}</p>
             <p className="text-sm text-[var(--text-primary)] mt-2"><span className="font-bold">Recommended:</span> {primaryAction}</p>
+            <div className="mt-3"><EvidenceTape>VIEW REPORT FOR FULL CASE</EvidenceTape></div>
           </div>
         </div>
       </div>
@@ -324,7 +326,7 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
         ))}
         {isSubmitting && (
           <div className="flex justify-end mb-4">
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm opacity-50 flex items-center gap-2">
+            <div className="case-sheet px-4 py-2.5 rounded-md text-sm opacity-70 flex items-center gap-2">
               <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span> Analyzing...
             </div>
           </div>
@@ -340,12 +342,12 @@ function ChatPanel({ conversation, toggleInsights, showInsights, onDelete, onCon
             onChange={(e) => setInputText(e.target.value)}
             disabled={isSubmitting}
             placeholder="Type a reply to continue analysis..."
-            className="w-full bg-[var(--surface-2)] border border-[var(--border-default)] rounded-full pl-6 pr-14 py-3 text-sm focus:ring-2 focus:ring-accent-violet/20 focus:border-accent-violet outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] disabled:opacity-50"
+            className="w-full bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md pl-6 pr-14 py-3 text-sm focus:ring-2 focus:ring-accent-cyan/20 focus:border-accent-cyan outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={!inputText.trim() || isSubmitting}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-violet-600 to-pink-500 text-white rounded-full flex items-center justify-center shadow-sm disabled:opacity-30 disabled:from-[var(--surface-3)] disabled:to-[var(--surface-3)] disabled:text-[var(--text-tertiary)] transition-all"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-[var(--text-primary)] text-[var(--surface-0)] rounded-md flex items-center justify-center shadow-sm disabled:opacity-30 disabled:bg-[var(--surface-3)] disabled:text-[var(--text-tertiary)] transition-all"
           >
             <span className="material-symbols-outlined text-[16px]">send</span>
           </button>
@@ -363,7 +365,7 @@ function InsightsPanel({ conversation }) {
     <div className="w-80 md:w-[430px] glass-sidebar border-l border-[var(--border-default)] h-full flex flex-col shrink-0 overflow-y-auto scrollbar-hide">
       <div className="p-4 border-b border-[var(--border-default)] sticky top-0 glass z-10">
         <h2 className="font-headline font-bold text-[var(--text-primary)] text-lg flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet">insights</span> Analysis Explanation
+          <span className="material-symbols-outlined text-accent-cyan">fact_check</span> Case Breakdown
         </h2>
       </div>
       <div className="p-5">
@@ -440,7 +442,7 @@ export default function History() {
     <div className="app-shell min-h-screen flex font-body overflow-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} setCollapsed={setSidebarCollapsed} />
       <div className="flex-grow flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        <TopNavbar title="Conversation History" />
+        <TopNavbar title="Case Archive" />
 
         <div className="flex-grow flex overflow-hidden">
           {loadError && (
@@ -471,14 +473,14 @@ export default function History() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)} />
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="relative glass-strong rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-glow-pink">
+                <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-md flex items-center justify-center mx-auto mb-4 text-red-500">
                   <span className="material-symbols-outlined text-[32px]">delete</span>
                 </div>
                 <h3 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-2">Delete Conversation?</h3>
                 <p className="text-[var(--text-secondary)] mb-6 text-sm">This action cannot be undone. Are you sure you want to permanently delete this analysis?</p>
                 <div className="flex gap-3 w-full">
                   <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-xl font-semibold text-[var(--text-secondary)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors">Cancel</button>
-                  <button onClick={confirmDelete} className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition-all shadow-glow-pink">Delete</button>
+                  <button onClick={confirmDelete} className="flex-1 py-2.5 rounded-md font-semibold text-white bg-red-600 hover:bg-red-700 transition-all">Delete</button>
                 </div>
               </motion.div>
             </div>

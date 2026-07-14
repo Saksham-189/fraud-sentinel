@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sidebar, TopNavbar, ToastNotification } from "./Dashboard";
-import { Reveal, StaggerContainer, StaggerItem } from "../components/Motion";
+import { Reveal } from "../components/Motion";
+import { BentoGrid, SpatialTile } from "../components/Bento";
 import { axiosClient } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { DoodleWall, EvidenceTape, GraffitiTag, ScoutMascot } from "../components/StreetArt";
 
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem("fs_user") || "{}"); } catch { return {}; }
@@ -24,7 +26,7 @@ function initialsFor(nameOrEmail) {
 function DetailRow({ label, value, icon, tone = "default" }) {
   const toneClass =
     tone === "success" ? "text-emerald-500" :
-    tone === "primary" ? "text-accent-violet" :
+    tone === "primary" ? "text-accent-cyan" :
     tone === "warning" ? "text-amber-500" :
     "text-[var(--text-primary)]";
   return (
@@ -40,12 +42,13 @@ function DetailRow({ label, value, icon, tone = "default" }) {
 
 function ProfileHero({ profile }) {
   return (
-    <div className="glass-card p-6 overflow-hidden relative">
-      <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-violet-500/5 to-transparent pointer-events-none" />
+    <div className="case-sheet p-6 overflow-hidden relative">
+      <DoodleWall tag="LOCKER" />
+      <div className="absolute right-0 top-0 h-full w-1/3 bg-[linear-gradient(to_left,color-mix(in_srgb,var(--evidence-blue)_10%,transparent),transparent)] pointer-events-none" />
       <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex items-center gap-5 min-w-0">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 p-[3px] shrink-0">
-            <div className="w-full h-full rounded-[13px] bg-[var(--surface-1)] flex items-center justify-center text-2xl font-bold text-accent-violet">
+          <div className="w-20 h-20 rounded-md border border-[var(--border-default)] bg-[var(--surface-2)] p-[3px] shrink-0">
+            <div className="w-full h-full rounded-[4px] bg-[var(--surface-1)] flex items-center justify-center text-2xl font-bold text-accent-cyan">
               {initialsFor(profile.name || profile.email)}
             </div>
           </div>
@@ -61,11 +64,12 @@ function ProfileHero({ profile }) {
             <p className="text-xs text-[var(--text-tertiary)] mt-2 font-mono truncate">ID {profile.id || "Not available"}</p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 relative z-10">
+          <EvidenceTape>INVESTIGATOR ID</EvidenceTape>
           <Link to="/settings" className="px-4 py-2 rounded-xl bg-[var(--surface-2)] text-[var(--text-secondary)] text-sm font-bold hover:bg-[var(--surface-3)] transition-colors flex items-center gap-2 border border-[var(--border-default)]">
             <span className="material-symbols-outlined text-[18px]">settings</span> Settings
           </Link>
-          <Link to="/history" className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-pink-500 text-white text-sm font-bold shadow-glow-violet hover:shadow-glow-violet-lg transition-all flex items-center gap-2">
+          <Link to="/history" className="px-4 py-2 rounded-md bg-[var(--text-primary)] text-[var(--surface-0)] text-sm font-bold transition-all flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">history</span> View History
           </Link>
         </div>
@@ -79,7 +83,7 @@ function AccountDetails({ profile }) {
     <div className="glass-card p-6">
       <div className="mb-4">
         <h2 className="font-headline font-bold text-lg text-[var(--text-primary)] flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet text-[20px]">badge</span> Account Details
+          <span className="material-symbols-outlined text-accent-cyan text-[20px]">badge</span> Account Details
         </h2>
         <p className="text-sm text-[var(--text-secondary)] mt-1">Identity and subscription information for your account.</p>
       </div>
@@ -131,7 +135,7 @@ function PreferencesCard({ onSave }) {
     <div className="glass-card p-6">
       <div className="mb-4">
         <h2 className="font-headline font-bold text-lg text-[var(--text-primary)] flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet text-[20px]">tune</span> Profile Preferences
+          <span className="material-symbols-outlined text-accent-cyan text-[20px]">tune</span> Profile Preferences
         </h2>
         <p className="text-sm text-[var(--text-secondary)] mt-1">Personalize how FraudSentinel behaves for this account.</p>
       </div>
@@ -145,7 +149,7 @@ function PreferencesCard({ onSave }) {
             <button
               type="button"
               onClick={() => toggle(row.key)}
-              className={`w-11 h-6 rounded-full p-1 transition-all shrink-0 ${prefs[row.key] ? "bg-gradient-to-r from-violet-600 to-pink-500 shadow-glow-violet" : "bg-[var(--surface-3)]"}`}
+              className={`w-11 h-6 rounded-full p-1 transition-all shrink-0 ${prefs[row.key] ? "bg-accent-cyan" : "bg-[var(--surface-3)]"}`}
               aria-label={row.label}
             >
               <span className={`block w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${prefs[row.key] ? "translate-x-5" : "translate-x-0"}`} />
@@ -231,10 +235,11 @@ export default function Profile() {
           <Reveal>
             <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
               <div>
-                <p className="text-sm font-bold text-accent-violet uppercase tracking-wide">Account Center</p>
-                <h1 className="text-3xl font-headline font-bold text-[var(--text-primary)] tracking-tight">Profile</h1>
+                <GraffitiTag tone="yellow">Investigator Locker</GraffitiTag>
+                <h1 className="text-3xl font-headline font-black text-[var(--text-primary)] tracking-tight mt-3">Profile</h1>
                 <p className="text-[var(--text-secondary)] mt-1">Manage your identity, security status, and account preferences.</p>
               </div>
+              <ScoutMascot mood="safe" className="hidden md:block w-20 h-20" />
               {loading && (
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-tertiary)]">
                   <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span> Syncing account
@@ -243,17 +248,23 @@ export default function Profile() {
             </div>
           </Reveal>
 
-          <StaggerContainer className="space-y-6">
-            <StaggerItem><ProfileHero profile={normalizedProfile} /></StaggerItem>
-            <StaggerItem>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <AccountDetails profile={normalizedProfile} />
-                <SecurityCard tokenPresent={Boolean(token)} />
-              </div>
-            </StaggerItem>
-            <StaggerItem><PreferencesCard onSave={showSavedToast} /></StaggerItem>
-            <StaggerItem><DangerZone onLogout={handleLogout} /></StaggerItem>
-          </StaggerContainer>
+          <BentoGrid>
+            <SpatialTile span="full" className="p-6">
+              <ProfileHero profile={normalizedProfile} />
+            </SpatialTile>
+            <SpatialTile span="wide" className="p-6">
+              <AccountDetails profile={normalizedProfile} />
+            </SpatialTile>
+            <SpatialTile span="wide" className="p-6">
+              <SecurityCard tokenPresent={Boolean(token)} />
+            </SpatialTile>
+            <SpatialTile span="wide" className="p-6">
+              <PreferencesCard onSave={showSavedToast} />
+            </SpatialTile>
+            <SpatialTile span="wide" className="p-6">
+              <DangerZone onLogout={handleLogout} />
+            </SpatialTile>
+          </BentoGrid>
         </main>
       </div>
       <ToastNotification show={toast.show} message={toast.title} subtext={toast.subtext} onClose={() => setToast((prev) => ({ ...prev, show: false }))} />

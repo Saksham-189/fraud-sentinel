@@ -21,13 +21,16 @@ export default {
         },
 
         /* ── Backward-Compatible Tokens ── */
-        "primary": "#7c3aed",
-        "primary-container": "#a78bfa",
+        "primary": "var(--accent-violet)",
+        "primary-container": "color-mix(in srgb, var(--accent-violet) 16%, transparent)",
         "on-primary": "#ffffff",
-        "secondary": "#ec4899",
-        "secondary-container": "#f472b6",
+        "secondary": "var(--accent-pink)",
+        "secondary-container": "color-mix(in srgb, var(--accent-pink) 16%, transparent)",
         "on-secondary": "#ffffff",
-        "error": "#ef4444",
+        "tertiary": "var(--accent-cyan)",
+        "error": "var(--risk-high)",
+        "error-container": "color-mix(in srgb, var(--risk-high) 14%, transparent)",
+        "on-error-container": "var(--risk-high)",
 
         /* Surface tokens (now driven by CSS vars) */
         "surface-variant": "var(--surface-3)",
@@ -59,8 +62,8 @@ export default {
       },
 
       fontSize: {
-        "headline-xl": ["40px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
-        "headline-lg": ["30px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "headline-xl": ["40px", { lineHeight: "1.2", letterSpacing: "0", fontWeight: "700" }],
+        "headline-lg": ["30px", { lineHeight: "1.3", letterSpacing: "0", fontWeight: "600" }],
         "headline-md": ["24px", { lineHeight: "1.4", fontWeight: "600" }],
         "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
         "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }],

@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Reveal, StaggerContainer, StaggerItem, HoverButton, AnimatedCounter } from "../components/Motion";
+import { HoverButton, AnimatedCounter } from "../components/Motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { performLogout } from "./Auth";
 import { analysisApi } from "../services/api";
+import { DoodleWall, EvidenceTape, GraffitiTag, ScoutMascot } from "../components/StreetArt";
+import { BentoActionStrip, BentoGrid, BentoHeader, BentoMetric, EvidenceStack, SpatialTile } from "../components/Bento";
 
 // ─── Shared Components ──────────────────────────────────────────────
 
@@ -14,14 +16,14 @@ function RiskBadge({ level }) {
   else if (normalized.includes("MEDIUM")) key = "MEDIUM";
 
   const styles = {
-    HIGH: "bg-gradient-to-r from-red-500/10 to-pink-500/10 text-red-500 border-red-500/20",
-    MEDIUM: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-500 border-amber-500/20",
-    SAFE: "bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 text-emerald-500 border-emerald-500/20",
+    HIGH: "text-[var(--risk-high)]",
+    MEDIUM: "text-[var(--risk-medium)]",
+    SAFE: "text-[var(--risk-safe)]",
   };
   const icon = { HIGH: "warning", MEDIUM: "info", SAFE: "check_circle" };
   const label = { HIGH: "High Risk", MEDIUM: "Medium Risk", SAFE: "Safe" };
   return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${styles[key]}`}>
+    <div className={`verdict-stamp ${styles[key]}`}>
       <span className="material-symbols-outlined text-[14px]">{icon[key]}</span>
       {label[key]}
     </div>
@@ -47,14 +49,19 @@ function SidebarContent({ isCollapsed }) {
   return (
     <>
       {/* Logo */}
-      <div className="p-5 flex items-center gap-3 border-b border-[var(--border-default)]">
+      <div className="p-5 flex items-center gap-3 border-b border-[var(--border-default)] relative overflow-hidden">
+        <DoodleWall tag="TRACE" className="opacity-30" />
+        <span className="material-symbols-outlined text-[22px] text-accent-cyan relative z-10">fingerprint</span>
         {!isCollapsed && (
-          <span className="font-headline text-lg font-bold gradient-text tracking-tight whitespace-nowrap">
-            FraudSentinel
-          </span>
+          <div className="relative z-10 min-w-0">
+            <span className="font-headline text-lg font-black tracking-tight whitespace-nowrap text-[var(--text-primary)]">
+              FraudSentinel
+            </span>
+            <p className="case-label !text-[10px] text-accent-cyan">Street Case Lab</p>
+          </div>
         )}
         {isCollapsed && (
-          <span className="font-headline text-lg font-bold gradient-text mx-auto">FS</span>
+          <span className="font-headline text-sm font-black mx-auto case-stamp text-accent-cyan">FS</span>
         )}
       </div>
 
@@ -68,14 +75,14 @@ function SidebarContent({ isCollapsed }) {
               to={item.to || "#"}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                 ${isActive
-                  ? "bg-accent-violet/10 text-accent-violet font-semibold"
+                  ? "bg-[var(--surface-2)] text-[var(--text-primary)] font-semibold shadow-sm"
                   : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
                 }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-violet-500 to-pink-500"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[4px] h-7 rounded-r-full bg-[var(--accent-yellow)]"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
               )}
@@ -90,9 +97,10 @@ function SidebarContent({ isCollapsed }) {
 
       {/* User Profile */}
       <div className="p-4 border-t border-[var(--border-default)]">
+        {!isCollapsed && <EvidenceTape className="mb-3">VERIFY FIRST</EvidenceTape>}
         <Link to="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--surface-2)] transition-colors">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 p-[2px] shrink-0">
-            <div className="w-full h-full rounded-full bg-[var(--surface-1)] flex items-center justify-center font-bold text-xs text-accent-violet">
+          <div className="w-8 h-8 rounded-md border border-[var(--border-default)] bg-[var(--surface-2)] p-[2px] shrink-0">
+            <div className="w-full h-full rounded-[4px] bg-[var(--surface-1)] flex items-center justify-center font-bold text-xs text-accent-cyan">
               {initials}
             </div>
           </div>
@@ -155,7 +163,7 @@ export function Sidebar({ isCollapsed }) {
       {/* Mobile FAB */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed bottom-6 left-6 z-30 md:hidden w-12 h-12 bg-gradient-to-r from-violet-600 to-pink-500 text-white rounded-full shadow-glow-violet flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        className="fixed bottom-6 left-6 z-30 md:hidden w-12 h-12 bg-[var(--surface-1)] text-[var(--text-primary)] border border-[var(--border-default)] rounded-md shadow-md flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
       >
         <span className="material-symbols-outlined">menu</span>
       </button>
@@ -166,16 +174,20 @@ export function Sidebar({ isCollapsed }) {
 export function TopNavbar({ title }) {
   return (
     <header className="glass sticky top-0 z-20 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center gap-4 border-b border-[var(--border-default)]">
-      <h1 className="font-headline text-xl md:text-2xl font-bold text-[var(--text-primary)] truncate">
-        {title}
-      </h1>
+      <div className="min-w-0">
+        <p className="case-label text-accent-cyan hidden sm:block">FraudSentinel workspace</p>
+        <h1 className="font-headline text-xl md:text-2xl font-black text-[var(--text-primary)] truncate">
+          {title}
+        </h1>
+      </div>
       <div className="flex items-center gap-3">
+        <EvidenceTape className="hidden xl:inline-flex">FOLLOW THE EVIDENCE</EvidenceTape>
         <div className="relative hidden lg:block">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-[18px]">search</span>
           <input
             type="text"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-full text-sm w-56 focus:ring-2 focus:ring-accent-violet/20 focus:border-accent-violet outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+            placeholder="Search case notes..."
+            className="pl-10 pr-4 py-2 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md text-sm w-56 focus:ring-2 focus:ring-accent-cyan/20 focus:border-accent-cyan outline-none transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
           />
         </div>
       </div>
@@ -222,31 +234,35 @@ function SkeletonPulse({ className, tag: Tag = "div" }) {
 function WelcomeBanner({ userName, totalAnalyses, isLoading }) {
   const displayName = userName || "there";
   const greeting = totalAnalyses > 0
-    ? `${totalAnalyses} analyse${totalAnalyses === 1 ? "" : "s"} completed`
-    : "Get started by analyzing your first message below.";
+    ? `${totalAnalyses} case${totalAnalyses === 1 ? "" : "s"} reviewed`
+    : "Start by submitting one suspicious message to the case desk.";
   return (
-    <Reveal>
-      <div className="glass-card px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
+    <SpatialTile span="feature" className="p-5">
+      <div className="flex h-full flex-col justify-between gap-5">
+        <DoodleWall tag="CASE DESK" />
+        <div className="relative z-10">
+          <GraffitiTag tone="yellow">Case Desk</GraffitiTag>
           <h2 className="font-headline text-xl md:text-2xl font-bold text-[var(--text-primary)]">
-            Welcome back,{" "}
+            Desk open for{" "}
             {isLoading ? (
               <SkeletonPulse tag="span" className="inline-block w-24 h-6 align-middle" />
             ) : (
-              <span className="gradient-text">{displayName}</span>
-            )}{" "}
-            <span className="animate-wave">👋</span>
+              <span className="text-accent-cyan">{displayName}</span>
+            )}
           </h2>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
             {isLoading ? <SkeletonPulse tag="span" className="inline-block w-40 h-4 align-middle" /> : greeting}
           </p>
         </div>
-        <Link to="/history" className="text-sm font-semibold text-accent-violet hover:opacity-80 flex items-center gap-1 shrink-0 transition-opacity">
-          <span className="material-symbols-outlined text-[18px]">history</span>
-          View History
-        </Link>
+        <div className="relative z-10 flex items-center gap-3">
+          <ScoutMascot className="hidden sm:block w-20 h-20" />
+          <Link to="/history" className="text-sm font-semibold text-accent-cyan hover:opacity-80 flex items-center gap-1 shrink-0 transition-opacity">
+            <span className="material-symbols-outlined text-[18px]">history</span>
+            Open Case Archive
+          </Link>
+        </div>
       </div>
-    </Reveal>
+    </SpatialTile>
   );
 }
 
@@ -274,15 +290,25 @@ function QuickAnalyzeHero({ onAnalysisComplete }) {
   };
 
   return (
-    <Reveal delay={0.05}>
-      <div className="glass-card p-6 glow-border">
-        <h3 className="font-headline font-bold text-lg text-[var(--text-primary)] mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet">bolt</span>
-          Quick Analyze
-        </h3>
-        <div className="relative">
+    <>
+      <SpatialTile span="hero" spotlight className="p-6 scan-line">
+      <div className="flex h-full flex-col justify-between gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 relative z-10">
+          <div>
+            <GraffitiTag tone="coral">Evidence Drop</GraffitiTag>
+            <h3 className="font-headline font-black text-2xl text-[var(--text-primary)] mt-3 flex items-center gap-2">
+              <span className="material-symbols-outlined text-accent-cyan">fingerprint</span>
+              Quick Analyze
+            </h3>
+            <p className="mt-2 max-w-xl text-sm text-[var(--text-secondary)]">
+              Paste suspicious text here. FraudSentinel turns it into a case file with evidence, confidence, and next steps.
+            </p>
+          </div>
+          <EvidenceTape>DON'T CLICK YET</EvidenceTape>
+        </div>
+        <div className="relative z-10">
           <textarea
-            className="w-full bg-[var(--surface-2)] border border-[var(--border-default)] rounded-2xl p-4 pr-32 text-sm focus:ring-2 focus:ring-accent-violet/20 outline-none resize-none h-28 transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+            className="w-full bg-[var(--surface-1)] border border-[var(--border-default)] rounded-2xl p-4 pr-32 text-sm focus:ring-2 focus:ring-accent-cyan/20 outline-none resize-none min-h-40 transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
             placeholder="Paste a suspicious message, SMS, email, or conversation snippet here..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -291,7 +317,7 @@ function QuickAnalyzeHero({ onAnalysisComplete }) {
             <HoverButton
               onClick={handleAnalyze}
               disabled={loading || !text.trim()}
-              className={`bg-gradient-to-r from-violet-600 to-pink-500 text-white px-5 py-2 rounded-xl font-semibold shadow-glow-violet flex items-center gap-2 transition-all ${(!text.trim() || loading) ? "opacity-40 cursor-not-allowed shadow-none" : ""}`}
+              className={`bg-[var(--text-primary)] text-[var(--surface-0)] px-5 py-2 rounded-md font-semibold flex items-center gap-2 transition-all ${(!text.trim() || loading) ? "opacity-40 cursor-not-allowed shadow-none" : ""}`}
             >
               {loading ? (
                 <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
@@ -302,9 +328,13 @@ function QuickAnalyzeHero({ onAnalysisComplete }) {
             </HoverButton>
           </div>
         </div>
+        <BentoActionStrip className="relative z-10 mt-3">
+          <span className="case-label">Checks OTP requests, links, urgency, threats, and impersonation.</span>
+        </BentoActionStrip>
       </div>
+      </SpatialTile>
       <ToastNotification show={showToast} onClose={() => setShowToast(false)} message="Analysis Complete" subtext="Redirecting to results..." />
-    </Reveal>
+    </>
   );
 }
 
@@ -314,54 +344,40 @@ function StatsCards({ stats, isLoading }) {
       title: "Total Analyses",
       value: stats.total_analyses,
       icon: "analytics",
-      gradient: "from-violet-500 to-indigo-500",
-      glowClass: "hover:shadow-glow-violet",
     },
     {
       title: "High Risk Found",
       value: stats.high_risk,
       icon: "warning",
-      gradient: "from-red-500 to-pink-500",
-      glowClass: "hover:shadow-glow-pink",
     },
     {
       title: "Safe Messages",
       value: stats.safe,
       icon: "verified_user",
-      gradient: "from-emerald-500 to-cyan-500",
-      glowClass: "hover:shadow-glow-cyan",
     },
   ];
 
   return (
-    <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <>
       {cards.map((c) => (
-        <StaggerItem key={c.title}>
-          <div className={`glass-card p-5 flex items-center gap-4 transition-shadow ${c.glowClass}`}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${c.gradient} text-white shrink-0 shadow-lg`}>
-              <span className="material-symbols-outlined text-[22px]">{c.icon}</span>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">{c.title}</p>
-              {isLoading ? (
-                <SkeletonPulse className="w-12 h-8 mt-1" />
-              ) : (
-                <p className="text-2xl font-bold text-[var(--text-primary)]">
-                  <AnimatedCounter value={c.value} />
-                </p>
-              )}
-            </div>
-          </div>
-        </StaggerItem>
+        <SpatialTile key={c.title} span="compact" className="p-4">
+          <BentoMetric
+            icon={c.icon}
+            label={c.title}
+            value={isLoading ? <SkeletonPulse className="inline-block w-12 h-8" /> : <AnimatedCounter value={c.value} />}
+            note={c.title === "High Risk Found" ? "Needs caution" : c.title === "Safe Messages" ? "Cleared cases" : "Total case files"}
+            tone={c.title === "High Risk Found" ? "danger" : c.title === "Safe Messages" ? "safe" : "cyan"}
+          />
+        </SpatialTile>
       ))}
-    </StaggerContainer>
+    </>
   );
 }
 
 function RecentAnalysesList({ analyses, isLoading }) {
   if (isLoading) {
     return (
-      <div className="glass-card p-6">
+      <SpatialTile span="wide" className="p-6">
         <div className="flex justify-between items-center mb-6">
           <SkeletonPulse className="w-32 h-6" />
           <SkeletonPulse className="w-16 h-4" />
@@ -378,19 +394,22 @@ function RecentAnalysesList({ analyses, isLoading }) {
             </div>
           ))}
         </div>
-      </div>
+      </SpatialTile>
     );
   }
 
   const isEmpty = !analyses || analyses.length === 0;
 
   return (
-    <Reveal delay={0.15}>
-      <div className="glass-card p-6">
-        <div className="flex justify-between items-center mb-5">
-          <h3 className="font-headline font-bold text-lg text-[var(--text-primary)]">Recent Analyses</h3>
+    <SpatialTile span="wide" className="p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
+          <BentoHeader
+            eyebrow="Case Archive"
+            title="Recent Case Files"
+            subtitle={isEmpty ? "Your analyzed messages will appear here." : "Open a recent analysis to continue the investigation."}
+          />
           {!isEmpty && (
-            <Link className="text-sm font-semibold text-accent-violet hover:opacity-80 flex items-center gap-1 transition-opacity" to="/history">
+            <Link className="text-sm font-semibold text-accent-cyan hover:opacity-80 flex items-center gap-1 transition-opacity" to="/history">
               View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           )}
@@ -398,9 +417,7 @@ function RecentAnalysesList({ analyses, isLoading }) {
 
         {isEmpty ? (
           <div className="text-center py-10">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--surface-2)] flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-[var(--text-tertiary)] text-[28px]">inbox</span>
-            </div>
+            <ScoutMascot mood="safe" className="w-20 h-20 mx-auto mb-3" />
             <p className="font-semibold text-[var(--text-primary)] mb-1">No analyses yet</p>
             <p className="text-sm text-[var(--text-secondary)] max-w-xs mx-auto">
               Paste your first suspicious message in the Quick Analyze box above to get started.
@@ -412,7 +429,7 @@ function RecentAnalysesList({ analyses, isLoading }) {
               <Link
                 key={item.id}
                 to="/history"
-                className="flex items-center justify-between p-3.5 rounded-xl hover:bg-[var(--surface-2)] border border-transparent hover:border-[var(--border-default)] transition-all cursor-pointer group"
+              className="flex items-center justify-between p-3.5 rounded-2xl hover:bg-[var(--surface-2)] border border-transparent hover:border-[var(--border-default)] transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-3 overflow-hidden pr-4">
                   <div className="w-9 h-9 rounded-full bg-[var(--surface-2)] flex items-center justify-center shrink-0 group-hover:bg-[var(--surface-3)] transition-colors">
@@ -430,15 +447,14 @@ function RecentAnalysesList({ analyses, isLoading }) {
             ))}
           </div>
         )}
-      </div>
-    </Reveal>
+      </SpatialTile>
   );
 }
 
 function ScamTypesCard({ scamTypes, isLoading }) {
   if (isLoading) {
     return (
-      <div className="glass-card p-6">
+      <SpatialTile span="tall" className="p-6">
         <SkeletonPulse className="w-48 h-6 mb-6" />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -449,7 +465,7 @@ function ScamTypesCard({ scamTypes, isLoading }) {
             </div>
           ))}
         </div>
-      </div>
+      </SpatialTile>
     );
   }
 
@@ -462,21 +478,14 @@ function ScamTypesCard({ scamTypes, isLoading }) {
     "Credential Request": "key",
     "Suspicious Links": "link",
   };
-  const gradientMap = {
-    "Urgency Language": "from-amber-500 to-orange-500",
-    "Fear / Threat Tactics": "from-red-500 to-pink-500",
-    "Authority Impersonation": "from-violet-500 to-indigo-500",
-    "Credential Request": "from-fuchsia-500 to-pink-500",
-    "Suspicious Links": "from-cyan-500 to-blue-500",
-  };
-
   return (
-    <Reveal delay={0.2}>
-      <div className="glass-card p-6 h-full flex flex-col">
-        <h3 className="font-headline font-bold text-lg text-[var(--text-primary)] mb-5 flex items-center gap-2">
-          <span className="material-symbols-outlined text-accent-violet">psychology</span>
-          Scam Types Detected
-        </h3>
+    <SpatialTile span="tall" className="p-6">
+      <div className="h-full flex flex-col">
+        <BentoHeader
+          eyebrow="Known Suspects"
+          title="Common Scam Categories"
+          subtitle={isEmpty ? "Patterns appear after real analyses." : "The patterns most often found in your saved case files."}
+        />
 
         {isEmpty ? (
           <div className="flex-grow flex flex-col items-center justify-center text-center py-6">
@@ -491,11 +500,10 @@ function ScamTypesCard({ scamTypes, isLoading }) {
         ) : (
           <div className="space-y-2.5 flex-grow">
             {scamTypes.map((type) => {
-              const gradient = gradientMap[type.name] || "from-slate-500 to-slate-600";
               const icon = iconMap[type.name] || "category";
               return (
                 <div key={type.name} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[var(--surface-2)] transition-colors">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${gradient} text-white shrink-0`}>
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-[var(--surface-2)] text-accent-cyan border border-[var(--border-default)] shrink-0">
                     <span className="material-symbols-outlined text-[16px]">{icon}</span>
                   </div>
                   <div className="flex-grow min-w-0">
@@ -510,7 +518,70 @@ function ScamTypesCard({ scamTypes, isLoading }) {
           </div>
         )}
       </div>
-    </Reveal>
+    </SpatialTile>
+  );
+}
+
+function ScoutTipTile() {
+  return (
+    <SpatialTile span="compact" className="p-4">
+      <div className="flex h-full items-center gap-4">
+        <ScoutMascot mood="ready" className="h-16 w-16 shrink-0" />
+        <div className="min-w-0">
+          <p className="case-label text-accent-cyan">Scout Tip</p>
+          <p className="mt-1 text-sm font-black leading-5 text-[var(--text-primary)]">
+            Real banks never ask for OTPs in chat. Verify in the official app.
+          </p>
+        </div>
+      </div>
+    </SpatialTile>
+  );
+}
+
+function RecentThreatNotes({ analyses, isLoading }) {
+  const highRisk = (analyses || [])
+    .filter((item) => String(item.threat_level || "").toUpperCase().includes("HIGH"))
+    .slice(0, 2);
+
+  return (
+    <SpatialTile span="feature" className="p-5">
+      <BentoHeader
+        eyebrow="Threat Notes"
+        title="Recent threat notes"
+        subtitle={isLoading ? "Checking your recent case files." : highRisk.length ? "High-risk cases that deserve another look." : "No recent high-risk case files found."}
+      />
+      <div className="mt-5 space-y-3">
+        {isLoading ? (
+          [1, 2].map((item) => <SkeletonPulse key={item} className="h-16 rounded-2xl" />)
+        ) : highRisk.length ? (
+          highRisk.map((item) => (
+            <Link
+              key={item.id}
+              to="/history"
+              className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-2)] p-4 transition-all hover:border-accent-cyan/40"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[var(--text-primary)] line-clamp-2">{item.input_text}</p>
+                <p className="mt-1 text-xs font-semibold text-[var(--text-tertiary)]">{formatTimeAgo(item.created_at)}</p>
+              </div>
+              <RiskBadge level={item.threat_level} />
+            </Link>
+          ))
+        ) : (
+          <EvidenceStack className="min-h-28">
+            <div className="flex h-full items-center justify-between gap-4">
+              <div>
+                <p className="case-label text-[var(--risk-safe)]">Quiet desk</p>
+                <p className="mt-1 text-sm font-bold text-[var(--text-primary)]">
+                  Your recent case files do not include a high-risk finding.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-3xl text-[var(--risk-safe)]">verified_user</span>
+            </div>
+          </EvidenceStack>
+        )}
+      </div>
+    </SpatialTile>
   );
 }
 
@@ -581,25 +652,16 @@ export default function Dashboard() {
       <Sidebar isCollapsed={isSidebarCollapsed} setCollapsed={setSidebarCollapsed} />
       <div className="flex-grow flex flex-col min-w-0 relative z-10">
         <TopNavbar title="Dashboard" />
-        <main className="flex-grow p-4 md:p-8 flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
-          {/* 1. Compact Welcome Banner */}
-          <WelcomeBanner userName={displayName} totalAnalyses={stats.total_analyses} isLoading={isLoading} />
-
-          {/* 2. Quick Analyze — Hero position */}
-          <QuickAnalyzeHero onAnalysisComplete={handleAnalysisComplete} />
-
-          {/* 3. Stats Cards — Real data with animated counters */}
-          <StatsCards stats={stats} isLoading={isLoading} />
-
-          {/* 4. Recent Analyses + Scam Types */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="lg:col-span-3">
-              <RecentAnalysesList analyses={stats.recent_analyses} isLoading={isLoading} />
-            </div>
-            <div className="lg:col-span-2">
-              <ScamTypesCard scamTypes={stats.top_scam_types} isLoading={isLoading} />
-            </div>
-          </div>
+        <main className="flex-grow p-4 md:p-8 max-w-[1440px] mx-auto w-full">
+          <BentoGrid>
+            <QuickAnalyzeHero onAnalysisComplete={handleAnalysisComplete} />
+            <WelcomeBanner userName={displayName} totalAnalyses={stats.total_analyses} isLoading={isLoading} />
+            <StatsCards stats={stats} isLoading={isLoading} />
+            <ScamTypesCard scamTypes={stats.top_scam_types} isLoading={isLoading} />
+            <RecentAnalysesList analyses={stats.recent_analyses} isLoading={isLoading} />
+            <ScoutTipTile />
+            <RecentThreatNotes analyses={stats.recent_analyses} isLoading={isLoading} />
+          </BentoGrid>
         </main>
       </div>
     </div>

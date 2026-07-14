@@ -4,6 +4,7 @@ import { Sidebar, TopNavbar, ToastNotification } from "./Dashboard";
 import { Reveal } from "../components/Motion";
 import { analysisApi } from "../services/api";
 import { buildLegacyIntelligenceFallback, IntelligenceDetails } from "../components/Intelligence";
+import { DoodleWall, EvidenceTape, GraffitiTag } from "../components/StreetArt";
 
 function Card({ children, className = "" }) {
   return <section className={`glass-card ${className}`}>{children}</section>;
@@ -55,7 +56,7 @@ function MetadataAndExport({ report, onToast }) {
   };
 
   const shareReport = async () => {
-    const shareData = { title: "Fraud Intelligence Report", text: summary, url: window.location.href };
+    const shareData = { title: "FraudSentinel Case Report", text: summary, url: window.location.href };
     if (navigator.share) {
       await navigator.share(shareData);
     } else {
@@ -65,11 +66,13 @@ function MetadataAndExport({ report, onToast }) {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 case-sheet overflow-hidden">
+      <DoodleWall tag="REPORT" />
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
         <div>
-          <h2 className="font-headline font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <span className="material-symbols-outlined text-accent-violet text-[20px]">info</span>
+          <GraffitiTag tone="yellow">Report Metadata</GraffitiTag>
+          <h2 className="font-headline font-black text-[var(--text-primary)] flex items-center gap-2 mt-4">
+            <span className="material-symbols-outlined text-accent-cyan text-[20px]">info</span>
             Analysis Details
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mt-4">
@@ -80,16 +83,16 @@ function MetadataAndExport({ report, onToast }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
-          <button onClick={() => window.print()} className="px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-pink-500 text-white text-sm font-bold flex items-center gap-2">
+          <button onClick={() => window.print()} className="px-4 py-2 rounded-md bg-[var(--text-primary)] text-[var(--surface-0)] text-sm font-bold flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span> Download PDF
           </button>
-          <button onClick={copySummary} className="px-4 py-2 rounded-lg bg-white border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
+          <button onClick={copySummary} className="px-4 py-2 rounded-md bg-[var(--surface-1)] border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">content_copy</span> Copy Summary
           </button>
-          <button onClick={shareReport} className="px-4 py-2 rounded-lg bg-white border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
+          <button onClick={shareReport} className="px-4 py-2 rounded-md bg-[var(--surface-1)] border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">ios_share</span> Share
           </button>
-          <button onClick={downloadJson} className="px-4 py-2 rounded-lg bg-white border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
+          <button onClick={downloadJson} className="px-4 py-2 rounded-md bg-[var(--surface-1)] border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-bold flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">data_object</span> JSON
           </button>
         </div>
@@ -143,11 +146,11 @@ export default function IntelligenceReport() {
     <div className="app-shell min-h-screen flex font-body overflow-x-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} setCollapsed={setSidebarCollapsed} />
       <div className="flex-grow flex flex-col min-w-0 relative z-10">
-        <TopNavbar title="Fraud Intelligence Report" />
+        <TopNavbar title="Forensic Case Report" />
         <main className="flex-grow p-4 md:p-8 max-w-[1280px] mx-auto w-full pb-20">
           {loading && (
             <div className="min-h-[400px] flex items-center justify-center">
-              <span className="material-symbols-outlined animate-spin text-[40px] text-accent-violet">progress_activity</span>
+              <span className="material-symbols-outlined animate-spin text-[40px] text-accent-cyan">progress_activity</span>
             </div>
           )}
 
@@ -166,13 +169,16 @@ export default function IntelligenceReport() {
             <Reveal>
               <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
                 <div>
-                  <p className="text-sm font-bold text-accent-violet uppercase tracking-wide">FraudSentinel Report</p>
-                  <h1 className="text-3xl font-headline font-bold text-[var(--text-primary)] tracking-tight">Threat Analysis Report</h1>
+                  <GraffitiTag tone="coral">Evidence Wall</GraffitiTag>
+                  <h1 className="text-3xl font-headline font-black text-[var(--text-primary)] tracking-tight mt-3">Forensic Case Report</h1>
                   <p className="text-[var(--text-secondary)] mt-1">Decision-ready explanation, evidence, confidence, and next steps.</p>
                 </div>
-                <Link to="/history" className="text-sm font-bold text-[var(--text-secondary)] hover:text-accent-violet flex items-center gap-1 transition-colors">
-                  <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to History
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <EvidenceTape>FOLLOW THE EVIDENCE</EvidenceTape>
+                  <Link to="/history" className="text-sm font-bold text-[var(--text-secondary)] hover:text-accent-cyan flex items-center gap-1 transition-colors">
+                    <span className="material-symbols-outlined text-[18px]">arrow_back</span> Back to History
+                  </Link>
+                </div>
               </div>
 
               <div className="space-y-6">

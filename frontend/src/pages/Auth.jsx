@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { HoverButton } from "../components/Motion"
 import { authApi } from "../services/api"
 import { useAuth } from "../context/AuthContext"
+import { DoodleWall, EvidenceTape, GraffitiTag, ScoutMascot } from "../components/StreetArt"
 
 // ─── Password Strength ──────────────────────────────────────────────
 
@@ -17,12 +18,12 @@ function PasswordStrength({ password }) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
   const labels = ["Very Weak", "Weak", "Fair", "Strong", "Very Strong"];
-  const gradients = [
-    "from-red-500 to-red-400",
-    "from-orange-500 to-amber-400",
-    "from-amber-500 to-yellow-400",
-    "from-emerald-500 to-green-400",
-    "from-cyan-500 to-emerald-400",
+  const colors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-amber-500",
+    "bg-emerald-600",
+    "bg-accent-cyan",
   ];
   const textColors = ["text-red-500", "text-orange-500", "text-amber-500", "text-emerald-500", "text-cyan-500"];
   const idx = Math.min(score, 4);
@@ -33,7 +34,7 @@ function PasswordStrength({ password }) {
           <div
             key={i}
             className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              i <= idx ? `bg-gradient-to-r ${gradients[idx]}` : "bg-[var(--surface-3)]"
+              i <= idx ? colors[idx] : "bg-[var(--surface-3)]"
             }`}
           />
         ))}
@@ -62,7 +63,7 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, error, 
           className={`w-full bg-[var(--surface-2)] border rounded-xl ${icon ? "pl-11" : "pl-4"} pr-12 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all duration-200 ${
             error
               ? "border-red-500/50 focus:ring-2 focus:ring-red-500/20"
-              : "border-[var(--border-default)] focus:border-accent-violet focus:ring-2 focus:ring-accent-violet/15"
+              : "border-[var(--border-default)] focus:border-accent-cyan focus:ring-2 focus:ring-accent-cyan/15"
           } disabled:opacity-50`}
         />
         {rightElement && (
@@ -168,12 +169,12 @@ function LoginForm({ onSwitch }) {
         rightElement={<PasswordVisibilityButton visible={showPw} onClick={() => setShowPw(!showPw)} disabled={loading} />}
       />
       <div className="flex justify-end">
-        <Link to="/forgot-password" className="text-xs font-semibold text-accent-violet hover:opacity-80 transition-opacity">Forgot password?</Link>
+        <Link to="/forgot-password" className="text-xs font-semibold text-accent-cyan hover:opacity-80 transition-opacity">Forgot password?</Link>
       </div>
-      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
+      <HoverButton type="submit" disabled={loading} className="w-full bg-[var(--text-primary)] text-[var(--surface-0)] py-3 rounded-md font-semibold text-sm transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Signing in...</> : <>Sign In<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
       </HoverButton>
-      <p className="text-center text-sm text-[var(--text-secondary)]">Don&apos;t have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Create one</button></p>
+      <p className="text-center text-sm text-[var(--text-secondary)]">Don&apos;t have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-cyan hover:opacity-80 transition-opacity">Create one</button></p>
     </motion.form>
   );
 }
@@ -232,10 +233,10 @@ function RegisterForm({ onSwitch }) {
         <PasswordStrength password={password} />
       </div>
       <AuthInput label="Confirm Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <button type="button" onClick={handleSubmit} disabled={loading} className="relative z-20 pointer-events-auto w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet hover:shadow-glow-violet-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
+      <button type="submit" disabled={loading} className="relative z-20 pointer-events-auto w-full bg-[var(--text-primary)] text-[var(--surface-0)] py-3 rounded-md font-semibold text-sm transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Creating account...</> : <>Create Account<span className="material-symbols-outlined text-[18px]">arrow_forward</span></>}
       </button>
-      <p className="text-center text-sm text-[var(--text-secondary)]">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-violet hover:opacity-80 transition-opacity">Sign in</button></p>
+      <p className="text-center text-sm text-[var(--text-secondary)]">Already have an account? <button type="button" onClick={onSwitch} className="font-semibold text-accent-cyan hover:opacity-80 transition-opacity">Sign in</button></p>
     </motion.form>
   );
 }
@@ -263,12 +264,12 @@ function ForgotPasswordForm() {
   if (sent) {
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow-cyan">
-          <span className="material-symbols-outlined text-white text-[32px]">mark_email_read</span>
+        <div className="w-16 h-16 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md flex items-center justify-center mx-auto mb-6">
+          <span className="material-symbols-outlined text-accent-cyan text-[32px]">mark_email_read</span>
         </div>
         <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-2">Check your email</h2>
         <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-xs mx-auto">We&apos;ve sent password reset instructions to <strong className="text-[var(--text-primary)]">{email}</strong></p>
-        <Link to="/login" className="text-sm font-semibold text-accent-violet hover:opacity-80 transition-opacity flex items-center justify-center gap-1">
+        <Link to="/login" className="text-sm font-semibold text-accent-cyan hover:opacity-80 transition-opacity flex items-center justify-center gap-1">
           <span className="material-symbols-outlined text-[16px]">arrow_back</span>Back to Sign In
         </Link>
       </motion.div>
@@ -277,14 +278,14 @@ function ForgotPasswordForm() {
   return (
     <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="space-y-5">
       <div className="text-center mb-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
-          <span className="material-symbols-outlined text-white text-[28px]">lock_reset</span>
+        <div className="w-14 h-14 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md flex items-center justify-center mx-auto mb-4">
+          <span className="material-symbols-outlined text-accent-cyan text-[28px]">lock_reset</span>
         </div>
         <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-1">Reset your password</h2>
         <p className="text-sm text-[var(--text-secondary)]">Enter your email and we&apos;ll send you instructions.</p>
       </div>
       <AuthInput label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" error={error} icon="mail" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+      <HoverButton type="submit" disabled={loading} className="w-full bg-[var(--text-primary)] text-[var(--surface-0)] py-3 rounded-md font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Sending...</> : "Send Reset Link"}
       </HoverButton>
       <Link to="/login" className="block text-center text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
@@ -329,8 +330,8 @@ function ResetPasswordForm() {
   return (
     <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit} className="space-y-5">
       <div className="text-center mb-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow-violet">
-          <span className="material-symbols-outlined text-white text-[28px]">password</span>
+        <div className="w-14 h-14 bg-[var(--surface-2)] border border-[var(--border-default)] rounded-md flex items-center justify-center mx-auto mb-4">
+          <span className="material-symbols-outlined text-accent-cyan text-[28px]">password</span>
         </div>
         <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-1">Set new password</h2>
         <p className="text-sm text-[var(--text-secondary)]">Your new password must be different from previous ones.</p>
@@ -347,7 +348,7 @@ function ResetPasswordForm() {
         <PasswordStrength password={password} />
       </div>
       <AuthInput label="Confirm New Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" error={errors.confirm} icon="lock" disabled={loading} />
-      <HoverButton type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-semibold text-sm shadow-glow-violet transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+      <HoverButton type="submit" disabled={loading} className="w-full bg-[var(--text-primary)] text-[var(--surface-0)] py-3 rounded-md font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2">
         {loading ? <><span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>Resetting...</> : "Reset Password"}
       </HoverButton>
     </motion.form>
@@ -363,7 +364,7 @@ export function AuthGuard({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--surface-0)] flex items-center justify-center p-6">
-        <span className="material-symbols-outlined animate-spin text-[40px] text-accent-violet">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-[40px] text-accent-cyan">progress_activity</span>
       </div>
     );
   }
@@ -371,14 +372,15 @@ export function AuthGuard({ children }) {
   if (!isAuthed) {
     return (
       <div className="min-h-screen aurora-bg bg-[var(--surface-0)] flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-strong rounded-2xl p-8 max-w-sm w-full text-center shadow-xl relative z-10">
-          <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-            <span className="material-symbols-outlined text-white text-[28px]">lock</span>
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="case-sheet rounded-md p-8 max-w-sm w-full text-center shadow-xl relative z-10 overflow-hidden">
+          <DoodleWall tag="LOCKED" />
+          <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-md flex items-center justify-center mx-auto mb-5">
+            <span className="material-symbols-outlined text-amber-500 text-[28px]">lock</span>
           </div>
           <h2 className="text-xl font-headline font-bold text-[var(--text-primary)] mb-2">Authentication Required</h2>
           <p className="text-sm text-[var(--text-secondary)] mb-6">Please sign in to access this page.</p>
           <Link to="/login">
-            <HoverButton className="bg-gradient-to-r from-violet-600 to-pink-500 text-white px-8 py-2.5 rounded-xl font-semibold text-sm shadow-glow-violet w-full">
+            <HoverButton className="bg-[var(--text-primary)] text-[var(--surface-0)] px-8 py-2.5 rounded-md font-semibold text-sm w-full">
               Sign In
             </HoverButton>
           </Link>
@@ -434,11 +436,12 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen aurora-bg bg-[var(--surface-0)] flex items-center justify-center p-6 font-body">
-      {/* Decorative floating glass shapes */}
+      {/* Decorative case-lab shapes */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[15%] left-[10%] w-32 h-32 rounded-3xl bg-violet-500/5 backdrop-blur-sm border border-violet-500/10 rotate-12 animate-float" />
-        <div className="absolute bottom-[20%] right-[15%] w-24 h-24 rounded-full bg-pink-500/5 backdrop-blur-sm border border-pink-500/10 animate-float" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-[60%] left-[5%] w-20 h-20 rounded-2xl bg-cyan-500/5 backdrop-blur-sm border border-cyan-500/10 -rotate-12 animate-float" style={{ animationDelay: "2s" }} />
+        <DoodleWall tag="ENTER LAB" />
+        <div className="absolute top-[14%] left-[10%] w-36 h-24 rounded-[22px_14px_20px_12px] border border-[var(--border-default)] bg-[var(--surface-1)]/20 rotate-6 animate-float" />
+        <div className="absolute bottom-[20%] right-[15%] w-28 h-28 rounded-[30px_18px_28px_14px] border border-[var(--border-default)] bg-[var(--surface-1)]/20 -rotate-6 animate-float" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-[62%] left-[5%] opacity-60"><EvidenceTape>CASE FILE</EvidenceTape></div>
       </div>
 
       {/* Auth Card */}
@@ -448,22 +451,28 @@ export default function Auth() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="glass-strong rounded-2xl p-8 md:p-10 glow-border">
+        <div className="case-sheet rounded-md p-8 md:p-10 overflow-hidden">
+          <div className="absolute -right-7 -top-8 hidden sm:block opacity-90">
+            <ScoutMascot className="w-24 h-24 rotate-6" />
+          </div>
           {/* Logo */}
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center gap-2">
-              <span className="material-symbols-outlined text-accent-violet text-[28px]">shield_locked</span>
-              <span className="font-headline font-bold text-xl gradient-text tracking-tight">FraudSentinel</span>
+              <span className="material-symbols-outlined text-accent-cyan text-[28px]">fingerprint</span>
+              <span className="font-headline font-bold text-xl text-[var(--text-primary)] tracking-tight">FraudSentinel</span>
             </Link>
+            <div className="mt-3 flex justify-center">
+              <GraffitiTag tone="yellow">Enter The Lab</GraffitiTag>
+            </div>
           </div>
 
           {!isForgotRoute && !isResetRoute && (
             <div className="text-center mb-6">
               <h1 className="text-2xl font-headline font-bold text-[var(--text-primary)] mb-1">
-                {mode === "login" ? "Welcome back" : "Get started"}
+                {mode === "login" ? "Welcome back, investigator" : "Open your case desk"}
               </h1>
               <p className="text-sm text-[var(--text-secondary)]">
-                {mode === "login" ? "Sign in to your fraud detection dashboard" : "Create your free account to start analyzing"}
+                {mode === "login" ? "Sign in and keep following the evidence." : "Create your free account to start analyzing suspicious messages."}
               </p>
             </div>
           )}
@@ -471,7 +480,7 @@ export default function Auth() {
           {getContent()}
 
           <p className="text-center text-xs text-[var(--text-tertiary)] mt-8">
-            By continuing you agree to our <a href="#" className="text-accent-violet hover:opacity-80">Terms</a> and <a href="#" className="text-accent-violet hover:opacity-80">Privacy Policy</a>
+            By continuing you agree to our <a href="#" className="text-accent-cyan hover:opacity-80">Terms</a> and <a href="#" className="text-accent-cyan hover:opacity-80">Privacy Policy</a>
           </p>
         </div>
       </motion.div>
